@@ -21,8 +21,14 @@ public class Robot extends SampleRobot{
 		
 	}
 	public void operatorControl(){
+		boolean driveType = cont1.getAxisCount()==6;//True means Xbox One controller, with variable-input triggers on axes 2 and 3.
+													//False means Logitech controller with buttons instead of triggers.
 		while(isOperatorControl() && isEnabled()){
-			drive.arcadeDrive((1-cont1.getRawAxis(3)) * cont1.getRawAxis(1), -cont1.getRawAxis(4));//Y axis of left stick, X of right
+			if(driveType){
+				drive.arcadeDrive((1-cont1.getRawAxis(3)) * cont1.getRawAxis(1), -cont1.getRawAxis(4));//Y axis of left stick, X of right
+			}else{
+				drive.arcadeDrive(cont1.getRawAxis(1), -cont1.getRawAxis(3));
+			}
 			SmartDashboard.putString("Left Encoder", encLeft.getStopped() ? "Stopped" : !encLeft.getDirection() ? "Forward" : "Backward");
 			SmartDashboard.putString("Right Encoder", encRight.getStopped() ? "Stopped" : encRight.getDirection() ? "Forward" : "Backward");
 			SmartDashboard.putNumber("Left Encoder Value", -encLeft.getDistance());
