@@ -1,13 +1,16 @@
 package org.usfirst.frc.team4131.robot;
 
+import edu.wpi.first.wpilibj.ADXL345_SPI;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
+import edu.wpi.first.wpilibj.interfaces.Accelerometer.Range;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot{
@@ -16,6 +19,7 @@ public class Robot extends SampleRobot{
 	private Encoder encLeft = new Encoder(0, 1), encRight = new Encoder(2, 3);
 	private AnalogInput sonar = new AnalogInput(0);
 	private Accelerometer accel = new BuiltInAccelerometer();
+	private ADXL345_SPI accel2 = new ADXL345_SPI(SPI.Port.kOnboardCS0, Range.k16G);
 	public Robot(){}
 	public void autonomous(){
 		
@@ -37,6 +41,10 @@ public class Robot extends SampleRobot{
 			SmartDashboard.putNumber("Accel X", accel.getX());
 			SmartDashboard.putNumber("Accel Y", accel.getY());
 			SmartDashboard.putNumber("Accel Z", accel.getZ());
+			accel2.updateTable();
+			SmartDashboard.putNumber("Accel 2 X", accel2.getX());
+			SmartDashboard.putNumber("Accel 2 Y", accel2.getY());
+			SmartDashboard.putNumber("Accel 2 Z", accel2.getZ());
 			Timer.delay(0.005);
 		}
 	}
