@@ -1,17 +1,17 @@
-Drive Controller (XB1)
-	--------
-	L Stick:	drive (gross control)
-	R Stick:	drive (fine control)
-	---OR---
+Drive Controller
 	L Stick:	drive (forward/backward, strafe)
 	R Stick X:	turning
-	--------
+	R Stick Y:	
 	L Trigger:	reverse throttle (further it's pushed, slower you go)
-Operator Controller (Logitech)
-	L Stick X:	left arm movement
-	L Stick Y:	left arm wheel control
-	R Stick X:	right arm movement
-	R Stick Y:	right arm wheel control
-	+Pad X:		claw rotation
-	+Pad Y:		claw elevation
-	L Bumper:	claw open/close (open while held)
+	R Trigger:	push out box (conveyor)
+	L Bumper:	reverse R Trigger (pull in)
+	R Bumper:	
+	A:			
+	B:			
+	X:			
+	Y:			
+	+Pad:		
+	Back:		
+	Set Screen:		
+	L Press:	
+	R Press:	
