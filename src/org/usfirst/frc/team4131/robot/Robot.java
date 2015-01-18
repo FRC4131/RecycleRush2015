@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.ADXL345_SPI;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
@@ -25,6 +26,8 @@ public class Robot extends SampleRobot{
 	private final double SONAR_OFFSET = sonar.getOffset()*Math.exp(-9);
 	private Accelerometer accel = new BuiltInAccelerometer();
 	private ADXL345_SPI accel2 = new ADXL345_SPI(SPI.Port.kOnboardCS0, Range.k16G);
+	private Gyro gyro = new Gyro(1);
+	private AnalogInput temp = new AnalogInput(2);
 	public Robot(){
 		drive.setInvertedMotor(MotorType.kRearLeft, true);
 		drive.setInvertedMotor(MotorType.kRearRight, false);
@@ -45,6 +48,10 @@ public class Robot extends SampleRobot{
 					SmartDashboard.putNumber("Accel 2 X", accel2.getX());
 					SmartDashboard.putNumber("Accel 2 Y", accel2.getY());
 					SmartDashboard.putNumber("Accel 2 Z", accel2.getZ());
+					SmartDashboard.putNumber("Gyro", gyro.getAngle());
+					SmartDashboard.putNumber("Gyro speed", -gyro.getAngle()/200);
+					SmartDashboard.putNumber("Temperature (C)", getTemp(true));
+					SmartDashboard.putNumber("Temperature (F)", getTemp(false ));
 					Timer.delay(0.005);
 				}
 			}
@@ -52,10 +59,11 @@ public class Robot extends SampleRobot{
 	}
 	public void autonomous(){
 		while(isAutonomous() && isEnabled()){
-			if(getSonar(true)>24) drive.drive(0.1, 0);
+			/*if(getSonar(true)>24) drive.drive(0.1, 0);
 			else drive.drive(0, 0);
 			SmartDashboard.putNumber("Sonar (in)", getSonar(true));
-			SmartDashboard.putNumber("Sonar (cm)", getSonar(false));
+			SmartDashboard.putNumber("Sonar (cm)", getSonar(false));*/
+			drive.arcadeDrive(0, -gyro.getAngle()/100);
 			Timer.delay(0.005);
 		}
 	}
@@ -68,12 +76,18 @@ public class Robot extends SampleRobot{
 			if(buttonReset.get()){
 				encLeft.reset();
 				encRight.reset();
+				gyro.reset();
 			}
 			Timer.delay(0.005);
 		}
 	}
 	private double getSonar(boolean inches){
 		return (sonar.getVoltage() * SONAR_MULT - SONAR_OFFSET) * 0.28 *(inches ? 1 : 2.54);
+	}
+	private double getTemp(boolean celsius){
+		double c = ((temp.getVoltage()-2.5)*9 + 25);
+		if(celsius) return c;
+		return 1.8*c + 32;
 	}
 	public void test(){
 		while(isTest() && isEnabled()){
