@@ -3,6 +3,7 @@ package org.usfirst.frc.team4131.robot;
 import edu.wpi.first.wpilibj.ADXL345_SPI;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Joystick;
@@ -29,6 +30,7 @@ public class Robot extends SampleRobot{
 	private ADXL345_SPI accel2 = new ADXL345_SPI(SPI.Port.kOnboardCS0, Range.k16G);
 	private Gyro gyro = new Gyro(1);
 	private AnalogInput temp = new AnalogInput(2);
+	private DigitalInput button = new DigitalInput(6);
 	public Robot(){
 		drive.setInvertedMotor(MotorType.kRearLeft, true);
 		drive.setInvertedMotor(MotorType.kRearRight, false);
@@ -52,6 +54,7 @@ public class Robot extends SampleRobot{
 					SmartDashboard.putNumber("Gyro", gyro.getAngle());
 					SmartDashboard.putNumber("Temperature (C)", getTemp(true));
 					SmartDashboard.putNumber("Temperature (F)", getTemp(false));
+					SmartDashboard.putBoolean("Microswitch", !button.get());//Pulled high
 					if(buttonReset.get()){
 						encLeft.reset();
 						encRight.reset();
@@ -80,7 +83,7 @@ public class Robot extends SampleRobot{
 					drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
 				}
 			}else if(buttonApproach.get()){
-				drive.drive(getSonar(true)>24 ? -0.2 : 0, 0);
+				drive.drive(getSonar(true)<24 && controller.getRawAxis(1)<0 ? 0 : controller.getRawAxis(1), controller.getRawAxis(4));
 			}else{
 				drive.arcadeDrive(controller.getRawAxis(1), controller.getRawAxis(4));//Y axis of left stick, X of right
 			}
@@ -88,7 +91,7 @@ public class Robot extends SampleRobot{
 		}
 	}
 	private double getSonar(boolean inches){
-		return (sonar.getVoltage() * SONAR_MULT - SONAR_OFFSET) * 0.28 *(inches ? 1 : 2.54);
+		return (sonar.getVoltage() * SONAR_MULT - SONAR_OFFSET) * 0.28 * (inches ? 1 : 2.54);
 	}
 	private double getTemp(boolean celsius){
 		double c = ((temp.getVoltage()-2.5)*9 + 25);
