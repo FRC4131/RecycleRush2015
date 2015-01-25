@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.interfaces.Accelerometer.Range;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot{
-	private RobotDrive drive = new RobotDrive(0, 1);
+	private RobotDrive drive = new RobotDrive(0, 1, 2, 3);
 	private Joystick controller = new Joystick(0);
 	private JoystickButton buttonReset = new JoystickButton(controller, 2), buttonCenter = new JoystickButton(controller, 3),
 			buttonApproach = new JoystickButton(controller, 4);//B, X and Y
@@ -32,7 +32,9 @@ public class Robot extends SampleRobot{
 	private AnalogInput temp = new AnalogInput(2);
 	private DigitalInput button = new DigitalInput(6);
 	public Robot(){
-		drive.setInvertedMotor(MotorType.kRearLeft, true);
+		drive.setInvertedMotor(MotorType.kFrontLeft, false);
+		drive.setInvertedMotor(MotorType.kFrontRight, false);
+		drive.setInvertedMotor(MotorType.kRearLeft, false);
 		drive.setInvertedMotor(MotorType.kRearRight, false);
 		new Thread(){
 			@Override
@@ -82,11 +84,8 @@ public class Robot extends SampleRobot{
 				}else{
 					drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
 				}
-			}else if(buttonApproach.get()){
-				drive.drive(getSonar(true)<24 && controller.getRawAxis(1)<0 ? 0 : controller.getRawAxis(1), controller.getRawAxis(4));
-			}else{
-				drive.arcadeDrive(controller.getRawAxis(1), controller.getRawAxis(4));//Y axis of left stick, X of right
 			}
+			drive.mecanumDrive_Cartesian(controller.getRawAxis(0), controller.getRawAxis(1), controller.getRawAxis(4), (int)gyro.getAngle());
 			Timer.delay(0.005);
 		}
 	}
