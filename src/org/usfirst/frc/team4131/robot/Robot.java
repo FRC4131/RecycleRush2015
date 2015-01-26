@@ -3,7 +3,6 @@ package org.usfirst.frc.team4131.robot;
 import edu.wpi.first.wpilibj.ADXL345_SPI;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Joystick;
@@ -11,6 +10,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
@@ -19,12 +19,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot{
 	private double wheelCirc=25.1327;
-//	private RobotDrive drive = new RobotDrive(0, 1, 2, 3);
-	private RobotDrive driveTestFL = new RobotDrive(0,10),driveTestFR=new RobotDrive(2,11),driveTestRL=new RobotDrive(1,12),driveTestRR=new RobotDrive(3,13);//Second number is a non-existent drive to allow AWD
+	private Talon frontLeft = new Talon(0), backLeft = new Talon(1), frontRight = new Talon(2), backRight = new Talon(3);
+	private RobotDrive drive = new RobotDrive(frontLeft, backLeft, frontRight, backRight);
 	private Joystick controller = new Joystick(0);
-	private JoystickButton buttonReset = new JoystickButton(controller, 2), buttonCenter = new JoystickButton(controller, 3),
+	private JoystickButton buttonReset = new JoystickButton(controller, 2), buttonCenter = new JoystickButton(controller, 3), 
 			buttonApproach = new JoystickButton(controller, 4);//B, X and Y
-	private Encoder encFrontLeft = new Encoder(0, 1), encFrontRight = new Encoder(2, 3), encRearLeft=new Encoder(6,7),encRearRight=new Encoder(8,9);
+	private Encoder encFrontLeft = new Encoder(0, 1), encFrontRight = new Encoder(2, 3), encRearLeft=new Encoder(6, 7), encRearRight=new Encoder(8, 9);
 	private AnalogInput sonar = new AnalogInput(0);
 	private final double SONAR_MULT = sonar.getLSBWeight()*Math.exp(-9);
 	private final double SONAR_OFFSET = sonar.getOffset()*Math.exp(-9);
@@ -34,14 +34,10 @@ public class Robot extends SampleRobot{
 	private AnalogInput temp = new AnalogInput(2);
 //	private DigitalInput button = new DigitalInput(6);
 	public Robot(){
-//		drive.setInvertedMotor(MotorType.kFrontLeft, false);
-//		drive.setInvertedMotor(MotorType.kFrontRight, false);
-//		drive.setInvertedMotor(MotorType.kRearLeft, false);
-//		drive.setInvertedMotor(MotorType.kRearRight, false);
-		driveTestFL.setInvertedMotor(MotorType.kFrontLeft, false);
-		driveTestFR.setInvertedMotor(MotorType.kFrontRight, false);
-		driveTestRL.setInvertedMotor(MotorType.kRearLeft, false);
-		driveTestRR.setInvertedMotor(MotorType.kRearRight, false);
+		drive.setInvertedMotor(MotorType.kFrontLeft, false);
+		drive.setInvertedMotor(MotorType.kFrontRight, false);
+		drive.setInvertedMotor(MotorType.kRearLeft, false);
+		drive.setInvertedMotor(MotorType.kRearRight, false);
 		encFrontLeft.setDistancePerPulse(wheelCirc/250);
 		encFrontRight.setDistancePerPulse(-wheelCirc/250);
 		encRearLeft.setDistancePerPulse(wheelCirc/360);
@@ -114,33 +110,17 @@ public class Robot extends SampleRobot{
 		return 1.8*c + 32;
 	}
 	public void test(){
-		double xifl = encFrontLeft.getDistance(),xifr=encFrontRight.getDistance(),xirl=encRearLeft.getDistance(),xirr=encRearRight.getDistance();
+		double xifl = encFrontLeft.getDistance(), xifr=encFrontRight.getDistance(), xirl=encRearLeft.getDistance(), xirr=encRearRight.getDistance();
 		while(isTest() && isEnabled()){
-			double xffl = encFrontLeft.getDistance(),xffr=encFrontRight.getDistance(),xfrl=encRearLeft.getDistance(),xfrr=encRearRight.getDistance();
-			if(xffl-xifl<25.1327){
-				driveTestFL.arcadeDrive(-.1, 0, false);
-			}
-			if(!(xffl-xifl<25.1327)){
-				driveTestFL.arcadeDrive(0, 0, false);
-			}
-			if(xffr-xifr<25.1327){
-				driveTestFR.arcadeDrive(-.1, 0, false);
-			}
-			if(!(xffr-xifr<25.1327)){
-				driveTestFR.arcadeDrive(0, 0, false);
-			}
-			if(xfrl-xirl<25.1327){
-				driveTestRL.arcadeDrive(-.1, 0, false);
-			}
-			if(!(xfrl-xirl<25.1327)){
-				driveTestRL.arcadeDrive(0, 0, false);
-			}
-			if(xfrr-xirr<25.1327){
-				driveTestRR.arcadeDrive(-.1, 0, false);
-			}
-			if(!(xfrr-xirr<25.1327)){
-				driveTestRR.arcadeDrive(0, 0, false);
-			}
+			double xffl = encFrontLeft.getDistance(), xffr=encFrontRight.getDistance(), xfrl=encRearLeft.getDistance(), xfrr=encRearRight.getDistance();
+			if(xffl-xifl<25.1327) frontLeft.set(-0.1);
+			if(!(xffl-xifl<25.1327)) frontLeft.set(0);
+			if(xffr-xifr<25.1327) frontRight.set(-0.1);
+			if(!(xffr-xifr<25.1327)) frontRight.set(0);
+			if(xfrl-xirl<25.1327) backLeft.set(-0.1);
+			if(!(xfrl-xirl<25.1327)) backLeft.set(0);
+			if(xfrr-xirr<25.1327) backRight.set(-0.1);
+			if(!(xfrr-xirr<25.1327)) backRight.set(0);
 			Timer.delay(0.005);
 		}
 	}
