@@ -18,11 +18,13 @@ import edu.wpi.first.wpilibj.interfaces.Accelerometer.Range;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot{
-	private RobotDrive drive = new RobotDrive(0, 1, 2, 3);
+	private double wheelCirc=25.1327;
+//	private RobotDrive drive = new RobotDrive(0, 1, 2, 3);
+	private RobotDrive driveTestFL = new RobotDrive(0,10),driveTestFR=new RobotDrive(2,11),driveTestRL=new RobotDrive(1,12),driveTestRR=new RobotDrive(3,13);//Second number is a non-existent drive to allow AWD
 	private Joystick controller = new Joystick(0);
 	private JoystickButton buttonReset = new JoystickButton(controller, 2), buttonCenter = new JoystickButton(controller, 3),
 			buttonApproach = new JoystickButton(controller, 4);//B, X and Y
-	private Encoder encLeft = new Encoder(0, 1), encRight = new Encoder(2, 3);
+	private Encoder encFrontLeft = new Encoder(0, 1), encFrontRight = new Encoder(2, 3), encRearLeft=new Encoder(6,7),encRearRight=new Encoder(8,9);
 	private AnalogInput sonar = new AnalogInput(0);
 	private final double SONAR_MULT = sonar.getLSBWeight()*Math.exp(-9);
 	private final double SONAR_OFFSET = sonar.getOffset()*Math.exp(-9);
@@ -30,22 +32,34 @@ public class Robot extends SampleRobot{
 	private ADXL345_SPI accel2 = new ADXL345_SPI(SPI.Port.kOnboardCS0, Range.k16G);
 	private Gyro gyro = new Gyro(1);
 	private AnalogInput temp = new AnalogInput(2);
-	private DigitalInput button = new DigitalInput(6);
+//	private DigitalInput button = new DigitalInput(6);
 	public Robot(){
-		drive.setInvertedMotor(MotorType.kFrontLeft, false);
-		drive.setInvertedMotor(MotorType.kFrontRight, false);
-		drive.setInvertedMotor(MotorType.kRearLeft, false);
-		drive.setInvertedMotor(MotorType.kRearRight, false);
+//		drive.setInvertedMotor(MotorType.kFrontLeft, false);
+//		drive.setInvertedMotor(MotorType.kFrontRight, false);
+//		drive.setInvertedMotor(MotorType.kRearLeft, false);
+//		drive.setInvertedMotor(MotorType.kRearRight, false);
+		driveTestFL.setInvertedMotor(MotorType.kFrontLeft, false);
+		driveTestFR.setInvertedMotor(MotorType.kFrontRight, false);
+		driveTestRL.setInvertedMotor(MotorType.kRearLeft, false);
+		driveTestRR.setInvertedMotor(MotorType.kRearRight, false);
+		encFrontLeft.setDistancePerPulse(wheelCirc/250);
+		encFrontRight.setDistancePerPulse(-wheelCirc/250);
+		encRearLeft.setDistancePerPulse(wheelCirc/360);
+		encRearRight.setDistancePerPulse(-wheelCirc/360);
 		new Thread(){
 			@Override
 			public void run(){
 				while(true){
 					SmartDashboard.putNumber("Sonar (in)", getSonar(true));
 					SmartDashboard.putNumber("Sonar (cm)", getSonar(false));
-					SmartDashboard.putString("Left Encoder", encLeft.getStopped() ? "Stopped" : encLeft.getDirection() ? "Forward" : "Backward");
-					SmartDashboard.putString("Right Encoder", encRight.getStopped() ? "Stopped" : encRight.getDirection() ? "Forward" : "Backward");
-					SmartDashboard.putNumber("Left Encoder Value", encLeft.getDistance());
-					SmartDashboard.putNumber("Right Encoder Value", encRight.getDistance());
+					SmartDashboard.putString("Front Left Encoder", encFrontLeft.getStopped() ? "Stopped" : encFrontLeft.getDirection() ? "Backward" : "Forward");
+					SmartDashboard.putString("Front Right Encoder", encFrontRight.getStopped() ? "Stopped" : encFrontRight.getDirection() ? "Forward" : "Backward");
+					SmartDashboard.putString("Rear Left Encoder", encRearLeft.getStopped() ? "Stopped" : encRearLeft.getDirection() ? "Backward" : "Forward");
+					SmartDashboard.putString("Rear Right Encoder", encRearRight.getStopped() ? "Stopped" : encRearRight.getDirection() ? "Forward" : "Backward");
+					SmartDashboard.putNumber("Front Left Encoder Value(in)", -encFrontLeft.getDistance());
+					SmartDashboard.putNumber("Front Right Encoder Value(in)", -encFrontRight.getDistance());
+					SmartDashboard.putNumber("Rear Left Encoder Value(in)", -encRearLeft.getDistance());
+					SmartDashboard.putNumber("Rear Right Encoder Value(in)", -encRearRight.getDistance());
 					SmartDashboard.putNumber("Accel X", accel.getX());
 					SmartDashboard.putNumber("Accel Y", accel.getY());
 					SmartDashboard.putNumber("Accel Z", accel.getZ());
@@ -56,10 +70,12 @@ public class Robot extends SampleRobot{
 					SmartDashboard.putNumber("Gyro", gyro.getAngle());
 					SmartDashboard.putNumber("Temperature (C)", getTemp(true));
 					SmartDashboard.putNumber("Temperature (F)", getTemp(false));
-					SmartDashboard.putBoolean("Microswitch", !button.get());//Pulled high
+//					SmartDashboard.putBoolean("Microswitch", !button.get());//Pulled high
 					if(buttonReset.get()){
-						encLeft.reset();
-						encRight.reset();
+						encFrontLeft.reset();
+						encFrontRight.reset();
+						encRearRight.reset();
+						encRearLeft.reset();
 						gyro.reset();
 					}
 					Timer.delay(0.005);
@@ -78,14 +94,14 @@ public class Robot extends SampleRobot{
 				double angle = -gyro.getAngle() % 360;
 				if(Math.abs(angle)>180) angle = Math.copySign(Math.abs(angle)-180, -angle);//-270 becomes 90, 315 becomes -45
 				if(Math.abs(angle)<1){
-					drive.arcadeDrive(0, 0, false);//Stop
+//					drive.arcadeDrive(0, 0, false);//Stop
 				}else if(Math.abs(angle)<15){
-					drive.arcadeDrive(0, Math.copySign(0.1, angle), false);//Move slowly
+//					drive.arcadeDrive(0, Math.copySign(0.1, angle), false);//Move slowly
 				}else{
-					drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
+//					drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
 				}
 			}
-			drive.mecanumDrive_Cartesian(controller.getRawAxis(0), controller.getRawAxis(1), controller.getRawAxis(4), (int)gyro.getAngle());
+//			drive.mecanumDrive_Cartesian(controller.getRawAxis(0), controller.getRawAxis(1), controller.getRawAxis(4), (int)gyro.getAngle());
 			Timer.delay(0.005);
 		}
 	}
@@ -98,8 +114,33 @@ public class Robot extends SampleRobot{
 		return 1.8*c + 32;
 	}
 	public void test(){
+		double xifl = encFrontLeft.getDistance(),xifr=encFrontRight.getDistance(),xirl=encRearLeft.getDistance(),xirr=encRearRight.getDistance();
 		while(isTest() && isEnabled()){
-			drive.arcadeDrive(-0.5, 0);
+			double xffl = encFrontLeft.getDistance(),xffr=encFrontRight.getDistance(),xfrl=encRearLeft.getDistance(),xfrr=encRearRight.getDistance();
+			if(xffl-xifl<25.1327){
+				driveTestFL.arcadeDrive(-.1, 0, false);
+			}
+			if(!(xffl-xifl<25.1327)){
+				driveTestFL.arcadeDrive(0, 0, false);
+			}
+			if(xffr-xifr<25.1327){
+				driveTestFR.arcadeDrive(-.1, 0, false);
+			}
+			if(!(xffr-xifr<25.1327)){
+				driveTestFR.arcadeDrive(0, 0, false);
+			}
+			if(xfrl-xirl<25.1327){
+				driveTestRL.arcadeDrive(-.1, 0, false);
+			}
+			if(!(xfrl-xirl<25.1327)){
+				driveTestRL.arcadeDrive(0, 0, false);
+			}
+			if(xfrr-xirr<25.1327){
+				driveTestRR.arcadeDrive(-.1, 0, false);
+			}
+			if(!(xfrr-xirr<25.1327)){
+				driveTestRR.arcadeDrive(0, 0, false);
+			}
 			Timer.delay(0.005);
 		}
 	}
