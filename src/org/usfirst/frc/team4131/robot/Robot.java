@@ -18,6 +18,10 @@ import edu.wpi.first.wpilibj.interfaces.Accelerometer.Range;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot{
+	public double durationFL;
+	public double durationFR;
+	public double durationRL;
+	public double durationRR;
 	private double wheelCirc=25.1327;
 	private Talon frontLeft = new Talon(0), backLeft = new Talon(1), frontRight = new Talon(2), backRight = new Talon(3);
 	private RobotDrive drive = new RobotDrive(frontLeft, backLeft, frontRight, backRight);
@@ -46,6 +50,10 @@ public class Robot extends SampleRobot{
 			@Override
 			public void run(){
 				while(true){
+					SmartDashboard.putNumber("TimeFL", durationFL);
+					SmartDashboard.putNumber("TimeFR", durationFR);
+					SmartDashboard.putNumber("TimeRR", durationRR);
+					SmartDashboard.putNumber("TimeRL", durationRL);
 					SmartDashboard.putNumber("Sonar (in)", getSonar(true));
 					SmartDashboard.putNumber("Sonar (cm)", getSonar(false));
 					SmartDashboard.putString("Front Left Encoder", encFrontLeft.getStopped() ? "Stopped" : encFrontLeft.getDirection() ? "Backward" : "Forward");
@@ -90,14 +98,14 @@ public class Robot extends SampleRobot{
 				double angle = -gyro.getAngle() % 360;
 				if(Math.abs(angle)>180) angle = Math.copySign(Math.abs(angle)-180, -angle);//-270 becomes 90, 315 becomes -45
 				if(Math.abs(angle)<1){
-//					drive.arcadeDrive(0, 0, false);//Stop
+					drive.arcadeDrive(0, 0, false);//Stop
 				}else if(Math.abs(angle)<15){
-//					drive.arcadeDrive(0, Math.copySign(0.1, angle), false);//Move slowly
+					drive.arcadeDrive(0, Math.copySign(0.1, angle), false);//Move slowly
 				}else{
-//					drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
+					drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
 				}
 			}
-//			drive.mecanumDrive_Cartesian(controller.getRawAxis(0), controller.getRawAxis(1), controller.getRawAxis(4), (int)gyro.getAngle());
+			drive.mecanumDrive_Cartesian(controller.getRawAxis(0), controller.getRawAxis(1), controller.getRawAxis(4), (int)gyro.getAngle());
 			Timer.delay(0.005);
 		}
 	}
@@ -111,16 +119,18 @@ public class Robot extends SampleRobot{
 	}
 	public void test(){
 		double xifl = encFrontLeft.getDistance(), xifr=encFrontRight.getDistance(), xirl=encRearLeft.getDistance(), xirr=encRearRight.getDistance();
+		Timer timer = new Timer();
+		timer.start();
 		while(isTest() && isEnabled()){
 			double xffl = encFrontLeft.getDistance(), xffr=encFrontRight.getDistance(), xfrl=encRearLeft.getDistance(), xfrr=encRearRight.getDistance();
 			if(xffl-xifl<25.1327) frontLeft.set(-0.1);
-			if(!(xffl-xifl<25.1327)) frontLeft.set(0);
+			else{frontLeft.set(0);durationFL = timer.get();}
 			if(xffr-xifr<25.1327) frontRight.set(-0.1);
-			if(!(xffr-xifr<25.1327)) frontRight.set(0);
+			else{frontRight.set(0);durationFR = timer.get();}
 			if(xfrl-xirl<25.1327) backLeft.set(-0.1);
-			if(!(xfrl-xirl<25.1327)) backLeft.set(0);
+			else{backLeft.set(0);durationRL = timer.get();}
 			if(xfrr-xirr<25.1327) backRight.set(-0.1);
-			if(!(xfrr-xirr<25.1327)) backRight.set(0);
+			else{backRight.set(0);durationRR = timer.get();}
 			Timer.delay(0.005);
 		}
 	}
