@@ -26,7 +26,7 @@ public class Robot extends SampleRobot{
 //	private Talon rearLeft = new Talon(1), rearRight = new Talon(3);
 	private PIDTalon frontLeft = new PIDTalon(1, 0, 1, false), rearLeft = new PIDTalon(2, 2, 3, false), frontRight = new PIDTalon(3, 4, 5, true), rearRight = new PIDTalon(4, 6, 7, true);
 	private RobotDrive drive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
-	private Joystick controller = new Joystick(0);
+	private Joystick controller = new Joystick(0), io = new Joystick(1);
 	private JoystickButton buttonReset = new JoystickButton(controller, 2), buttonCenter = new JoystickButton(controller, 3);//B, X
 //	private Encoder encFrontLeft = new Encoder(0, 1), encRearLeft = new Encoder(2, 3), encFrontRight = new Encoder(4, 5), encRearRight = new Encoder(6, 7);
 	private AnalogInput sonar = new AnalogInput(0);
@@ -74,7 +74,6 @@ public class Robot extends SampleRobot{
 					SmartDashboard.putNumber("Gyro", gyro.getAngle());
 					SmartDashboard.putNumber("Temperature (C)", getTemp(true));
 					SmartDashboard.putNumber("Temperature (F)", getTemp(false));
-//					SmartDashboard.putBoolean("Microswitch", !button.get());//Pulled high
 					if(buttonReset.get()){
 						/*encFrontLeft.reset();
 						encFrontRight.reset();
@@ -104,62 +103,30 @@ public class Robot extends SampleRobot{
 				else if(Math.abs(angle)<15) drive.arcadeDrive(0, Math.copySign(0.1, angle), false);//Move slowly
 				else drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
 			}
-			drive.mecanumDrive_Cartesian(controller.getRawAxis(0), controller.getRawAxis(1), controller.getRawAxis(4), (int)gyro.getAngle());
+			double x = controller.getRawAxis(0) - (controller.getRawAxis(0) % 0.1);//Round to nearest 0.1
+			double y = controller.getRawAxis(1) - (controller.getRawAxis(1) % 0.1);
+			double turn = controller.getRawAxis(4) - (controller.getRawAxis(4) % 0.1);
+			drive.mecanumDrive_Cartesian(x, y, turn, (int)gyro.getAngle());
 			PIDTalon.equalize();
+			SmartDashboard.putBoolean("Button", io.getRawButton(1));
 			Timer.delay(0.005);
 		}
 	}
-	/*public void operatorControl(){
-	int ticks = 0;
-	while(isOperatorControl() && isEnabled()){
-		drive(-0.2);
-		if(ticks % 20 == 0) PIDTalon.equalize();
-		ticks++;
-		Timer.delay(0.005);
+	public void test(){
+		int ticks = 0;
+		while(isOperatorControl() && isEnabled()){
+			drive(-0.2);
+			if(ticks % 20 == 0) PIDTalon.equalize();
+			ticks++;
+			Timer.delay(0.005);
+		}
 	}
-}*/
-	private double getSonar(boolean inches){
-		return (sonar.getVoltage() * SONAR_MULT - SONAR_OFFSET) * 0.28 * (inches ? 1 : 2.54);
-	}
+	private double getSonar(boolean inches){return (sonar.getVoltage() * SONAR_MULT - SONAR_OFFSET) * 0.28 * (inches ? 1 : 2.54);}
 	private double getTemp(boolean celsius){
 		double c = ((temp.getVoltage()-2.5)*9 + 25);
 		if(celsius) return c;
 		return 1.8*c + 32;
 	}
-	/*public void test(){
-		double xifl = encFrontLeft.getDistance(), xifr=encFrontRight.getDistance(), xirl=encRearLeft.getDistance(), xirr=encRearRight.getDistance();
-		Timer timer = new Timer();
-		timer.start();
-		while(isTest() && isEnabled()){
-			double xffl = encFrontLeft.getDistance(), xffr=encFrontRight.getDistance(), xfrl=encRearLeft.getDistance(), xfrr=encRearRight.getDistance();
-			if(Math.abs(xffl-xifl)<25.1327) 
-				frontLeft.set(-0.1);
-			else{
-				frontLeft.set(0);
-				durationFL = timer.get();
-				SmartDashboard.putNumber("durationFL", timer.get());
-				}
-			if(Math.abs(xffr-xifr)<25.1327) 
-				frontRight.set(-0.1);
-			else{
-				frontRight.set(0);
-				durationFR = timer.get();
-				}
-			if(Math.abs(xfrl-xirl)<25.1327) 
-				backLeft.set(-0.1);
-			else{
-				backLeft.set(0);
-				durationRL = timer.get();
-				}
-			if(Math.abs(xfrr-xirr)<25.1327) 
-				backRight.set(-0.1);
-			else{
-				backRight.set(0);
-				durationRR = timer.get();
-				}
-			Timer.delay(0.005);
-		}
-	}*/
 	private void drive(double value){
 //		frontLeft.set(fl*13.67 / 22.80);
 //		rearLeft.set(rl*17.17 / 22.80);
