@@ -151,7 +151,7 @@ public class Robot extends SampleRobot{
 		boolean inversion=false;
 		boolean speedingUp=true;
 		if(feet<0)inversion=true;
-		double xi = 0;
+		double xi = avgDistance();
 		final double xf = xi+(feet*12);//converting feet to in.
 		while(inversion?xf<xi:xi<xf){
 			if(speedingUp){
