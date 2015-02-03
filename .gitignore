@@ -1,9 +1,8 @@
 *.class
 *.jar
+*.xml
 hs_err_pid*
+build*
 /misc
 .classpath
 .project
-build.properties
-build.xml
-SysProps.xml
