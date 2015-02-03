@@ -24,7 +24,7 @@ public class Robot extends SampleRobot{
 //	private final double CIRCUMFERENCE = 25.1327;//Circumference of each wheel
 //	private PIDTalon frontLeft = new PIDTalon(0, 0, 1, false), frontRight = new PIDTalon(2, 4, 5, true);
 //	private Talon rearLeft = new Talon(1), rearRight = new Talon(3);
-	private PIDTalon frontLeft = new PIDTalon(1, 0, 1, false), rearLeft = new PIDTalon(2, 2, 3, false), frontRight = new PIDTalon(3, 4, 5, true), rearRight = new PIDTalon(4, 6, 7, true);
+	private PIDTalon frontLeft = new PIDTalon(1, 0, 1,250, false), rearLeft = new PIDTalon(2, 2, 3,360, false), frontRight = new PIDTalon(3, 4, 5, 250, true), rearRight = new PIDTalon(4, 6, 7, 360, true);
 	private RobotDrive drive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
 	private Joystick controller = new Joystick(0), io = new Joystick(1);
 	private JoystickButton buttonReset = new JoystickButton(controller, 2), buttonCenter = new JoystickButton(controller, 3);//B, X
