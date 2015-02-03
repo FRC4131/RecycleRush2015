@@ -14,9 +14,10 @@ public class PIDTalon extends CANTalon{
 	private double prevValue = 0;//Previous encoder value
 	private double ratio = 1;//Distance per power unit
 	private double mult = 1;//Multiplier set by equalizer
-	public PIDTalon(int motor, int enc1, int enc2, boolean inverted){
+	public PIDTalon(int motor, int enc1, int enc2,int pulsesPerRev, boolean inverted){
 		super(motor);
 		encoder = new Encoder(enc1, enc2);
+		encoder.setDistancePerPulse(25.1327/pulsesPerRev);
 //		encoder.setReverseDirection(inverted);
 		this.inverted = inverted;
 		motors.add(this);

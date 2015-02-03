@@ -24,7 +24,7 @@ public class Robot extends SampleRobot{
 //	private final double CIRCUMFERENCE = 25.1327;//Circumference of each wheel
 //	private PIDTalon frontLeft = new PIDTalon(0, 0, 1, false), frontRight = new PIDTalon(2, 4, 5, true);
 //	private Talon rearLeft = new Talon(1), rearRight = new Talon(3);
-	private PIDTalon frontLeft = new PIDTalon(1, 0, 1, false), rearLeft = new PIDTalon(2, 2, 3, false), frontRight = new PIDTalon(3, 4, 5, true), rearRight = new PIDTalon(4, 6, 7, true);
+	private PIDTalon frontLeft = new PIDTalon(1, 0, 1,250, false), rearLeft = new PIDTalon(2, 2, 3,360, false), frontRight = new PIDTalon(3, 4, 5, 250, true), rearRight = new PIDTalon(4, 6, 7, 360, true);
 	private RobotDrive drive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
 	private Joystick controller = new Joystick(0), io = new Joystick(1);
 	private JoystickButton buttonReset = new JoystickButton(controller, 2), buttonCenter = new JoystickButton(controller, 3);//B, X
@@ -126,6 +126,55 @@ public class Robot extends SampleRobot{
 		double c = ((temp.getVoltage()-2.5)*9 + 25);
 		if(celsius) return c;
 		return 1.8*c + 32;
+	}
+	private void changeX(){
+		
+	}
+	private void changeY(){
+		
+	}
+	private double avgDistance(){
+		return (frontLeft.getDistance()+frontRight.getDistance()+rearRight.getDistance()+rearLeft.getDistance())/4.0; 
+	}
+	private void rotateTo(double angle){
+		boolean incomplete = true;
+		if(Math.abs(angle)>180) angle = Math.copySign(Math.abs(angle)-180, -angle);//-270 becomes 90, 315 becomes -45
+		while(incomplete){
+			if(Math.abs(angle)<1){
+				drive.arcadeDrive(0, 0, false);//Stop
+				incomplete=false;
+			}else if(Math.abs(angle)<15)drive.arcadeDrive(0, Math.copySign(0.1, angle), false);//Move slowly
+			else drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
+		}
+	}
+	private void moveStraight(double feet){
+		boolean inversion=false;
+		if(feet<0)inversion=true;
+		double xi = avgDistance();
+		final double xf = xi+(feet*12);//converting feet to in.
+		while(inversion?xf<xi:xi<xf){
+			if((inversion?xi-xf:xf-xi)>36){//if three feet or more, move fast
+				drive.arcadeDrive(inversion?-1.0:1.0, 0, false);
+			}else if((inversion?xi-xf:xf-xi)<=36&&(inversion?xi-xf:xf-xi)>18){//if between 1.5ft to 3ft
+				drive.arcadeDrive(inversion?-0.5:0.5,0,false);
+			}else{
+				drive.arcadeDrive(inversion?-0.2:0.2,0,false);
+			}
+			xi=avgDistance();
+		}
+		drive.arcadeDrive(0,0,false);//kill or stop
+	}
+	private void addRotate(double angle){
+		boolean incomplete = true;
+		angle+=gyro.getAngle();
+		if(Math.abs(angle)>180) angle = Math.copySign(Math.abs(angle)-180, -angle);//-270 becomes 90, 315 becomes -45
+		while(incomplete){
+			if(Math.abs(angle)<1){
+				drive.arcadeDrive(0, 0, false);//Stop
+				incomplete=false;
+			}else if(Math.abs(angle)<15)drive.arcadeDrive(0, Math.copySign(0.1, angle), false);//Move slowly
+			else drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
+		}
 	}
 	private void drive(double value){
 //		frontLeft.set(fl*13.67 / 22.80);
