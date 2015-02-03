@@ -127,12 +127,12 @@ public class Robot extends SampleRobot{
 		if(celsius) return c;
 		return 1.8*c + 32;
 	}
-	private void changeX(){
-		
-	}
-	private void changeY(){
-		
-	}
+//	private void changeX(){
+//		
+//	}
+//	private void changeY(){
+//		
+//	}
 	private double avgDistance(){
 		return (frontLeft.getDistance()+frontRight.getDistance()+rearRight.getDistance()+rearLeft.getDistance())/4.0; 
 	}
@@ -149,18 +149,27 @@ public class Robot extends SampleRobot{
 	}
 	private void moveStraight(double feet){
 		boolean inversion=false;
+		boolean speedingUp=true;
 		if(feet<0)inversion=true;
-		double xi = avgDistance();
+		double xi = 0;
 		final double xf = xi+(feet*12);//converting feet to in.
 		while(inversion?xf<xi:xi<xf){
-			if((inversion?xi-xf:xf-xi)>36){//if three feet or more, move fast
-				drive.arcadeDrive(inversion?-1.0:1.0, 0, false);
-			}else if((inversion?xi-xf:xf-xi)<=36&&(inversion?xi-xf:xf-xi)>18){//if between 1.5ft to 3ft
-				drive.arcadeDrive(inversion?-0.5:0.5,0,false);
+			if(speedingUp){
+				if((inversion?xi-xf:xf-xi)>0.5){
+					drive.arcadeDrive(inversion?-0.4:0.4,0,false);
+				}else{
+					speedingUp=false;
+				}
 			}else{
-				drive.arcadeDrive(inversion?-0.2:0.2,0,false);
+				if((inversion?xi-xf:xf-xi)>36){//if three feet or more, move fast
+					drive.arcadeDrive(inversion?-1.0:1.0, 0, false);
+				}else if((inversion?xi-xf:xf-xi)<=36&&(inversion?xi-xf:xf-xi)>18){//if between 1.5ft to 3ft
+					drive.arcadeDrive(inversion?-0.5:0.5,0,false);
+				}else{
+					drive.arcadeDrive(inversion?-0.2:0.2,0,false);
+				}
+				xi=avgDistance();
 			}
-			xi=avgDistance();
 		}
 		drive.arcadeDrive(0,0,false);//kill or stop
 	}
