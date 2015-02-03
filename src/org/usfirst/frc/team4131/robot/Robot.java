@@ -127,6 +127,55 @@ public class Robot extends SampleRobot{
 		if(celsius) return c;
 		return 1.8*c + 32;
 	}
+	private void changeX(){
+		
+	}
+	private void changeY(){
+		
+	}
+	private double avgDistance(){
+		return (frontLeft.getDistance()+frontRight.getDistance()+rearRight.getDistance()+rearLeft.getDistance())/4.0; 
+	}
+	private void rotateTo(double angle){
+		boolean incomplete = true;
+		if(Math.abs(angle)>180) angle = Math.copySign(Math.abs(angle)-180, -angle);//-270 becomes 90, 315 becomes -45
+		while(incomplete){
+			if(Math.abs(angle)<1){
+				drive.arcadeDrive(0, 0, false);//Stop
+				incomplete=false;
+			}else if(Math.abs(angle)<15)drive.arcadeDrive(0, Math.copySign(0.1, angle), false);//Move slowly
+			else drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
+		}
+	}
+	private void moveStraight(double feet){
+		boolean inversion=false;
+		if(feet<0)inversion=true;
+		double xi = avgDistance();
+		final double xf = xi+(feet*12);//converting feet to in.
+		while(inversion?xf<xi:xi<xf){
+			if((inversion?xi-xf:xf-xi)>36){//if three feet or more, move fast
+				drive.arcadeDrive(inversion?-1.0:1.0, 0, false);
+			}else if((inversion?xi-xf:xf-xi)<=36&&(inversion?xi-xf:xf-xi)>18){//if between 1.5ft to 3ft
+				drive.arcadeDrive(inversion?-0.5:0.5,0,false);
+			}else{
+				drive.arcadeDrive(inversion?-0.2:0.2,0,false);
+			}
+			xi=avgDistance();
+		}
+		drive.arcadeDrive(0,0,false);//kill or stop
+	}
+	private void addRotate(double angle){
+		boolean incomplete = true;
+		angle+=gyro.getAngle();
+		if(Math.abs(angle)>180) angle = Math.copySign(Math.abs(angle)-180, -angle);//-270 becomes 90, 315 becomes -45
+		while(incomplete){
+			if(Math.abs(angle)<1){
+				drive.arcadeDrive(0, 0, false);//Stop
+				incomplete=false;
+			}else if(Math.abs(angle)<15)drive.arcadeDrive(0, Math.copySign(0.1, angle), false);//Move slowly
+			else drive.arcadeDrive(0, Math.copySign(0.3, angle), false);//Move quickly
+		}
+	}
 	private void drive(double value){
 //		frontLeft.set(fl*13.67 / 22.80);
 //		rearLeft.set(rl*17.17 / 22.80);
