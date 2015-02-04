@@ -8,16 +8,16 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class PIDTalon extends CANTalon{
+//	private static final double CIRCUMFERENCE = 25.1327;//Circumference of each wheel
 	private static List<PIDTalon> motors = new ArrayList<PIDTalon>();//List of all motors assigned
 	private Encoder encoder;
 	private boolean inverted;
 	private double prevValue = 0;//Previous encoder value
 	private double ratio = 1;//Distance per power unit
 	private double mult = 1;//Multiplier set by equalizer
-	public PIDTalon(int motor, int enc1, int enc2,int pulsesPerRev, boolean inverted){
+	public PIDTalon(int motor, int enc1, int enc2, boolean inverted){
 		super(motor);
 		encoder = new Encoder(enc1, enc2);
-		encoder.setDistancePerPulse(25.1327/pulsesPerRev);
 //		encoder.setReverseDirection(inverted);
 		this.inverted = inverted;
 		motors.add(this);
