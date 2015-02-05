@@ -21,9 +21,11 @@ public class Robot extends SampleRobot{
 	public double durationFR;
 	public double durationRL;
 	public double durationRR;
+	public boolean xRun, yRun;
+	public double yAccel, xAccel;
+	public double ySpeed, xSpeed;
+	public double yDist,xDist;
 //	private final double CIRCUMFERENCE = 25.1327;//Circumference of each wheel
-//	private PIDTalon frontLeft = new PIDTalon(0, 0, 1, false), frontRight = new PIDTalon(2, 4, 5, true);
-//	private Talon rearLeft = new Talon(1), rearRight = new Talon(3);
 	private PIDTalon frontLeft = new PIDTalon(1, 0, 1,250, false), rearLeft = new PIDTalon(2, 2, 3,360, false), frontRight = new PIDTalon(3, 4, 5, 250, true), rearRight = new PIDTalon(4, 6, 7, 360, true);
 	private RobotDrive drive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
 	private Joystick controller = new Joystick(0), io = new Joystick(1);
@@ -33,7 +35,7 @@ public class Robot extends SampleRobot{
 	private final double SONAR_MULT = sonar.getLSBWeight() * Math.exp(-9);//These two values and calculations are from the Javadoc
 	private final double SONAR_OFFSET = sonar.getOffset() * Math.exp(-9);//of 
 	private Accelerometer accel = new BuiltInAccelerometer();
-	private ADXL345_SPI accel2 = new ADXL345_SPI(SPI.Port.kOnboardCS0, Range.k16G);
+	private ADXL345_SPI accel2 = new ADXL345_SPI(SPI.Port.kOnboardCS0, Range.k16G);//x is side to side, y is forward and back, and z is verticallity
 	private Gyro gyro = new Gyro(1);
 	private AnalogInput temp = new AnalogInput(2);
 //	private DigitalInput button = new DigitalInput(6);
@@ -42,10 +44,6 @@ public class Robot extends SampleRobot{
 		drive.setInvertedMotor(MotorType.kFrontRight, false);
 		drive.setInvertedMotor(MotorType.kRearLeft, false);
 		drive.setInvertedMotor(MotorType.kRearRight, false);
-//		encFrontLeft.setDistancePerPulse(CIRCUMFERENCE/250);//distance in inches per tick divided inches per second
-//		encFrontRight.setDistancePerPulse(-CIRCUMFERENCE/250);//returns time
-//		encRearLeft.setDistancePerPulse(CIRCUMFERENCE/360);
-//		encRearRight.setDistancePerPulse(-CIRCUMFERENCE/360);
 		new Thread(){
 			@Override
 			public void run(){
@@ -130,8 +128,11 @@ public class Robot extends SampleRobot{
 	private void changeX(){
 		
 	}
-	private void changeY(){
-		
+	private void changeY(double feet){
+//		double xi=0;
+//		double accelvalues;
+//		yRun = true;
+//		drive.mecanumDrive_Cartesian(0, 0.4, 0, gyro.getAngle());
 	}
 	private double avgDistance(){
 		return (frontLeft.getDistance()+frontRight.getDistance()+rearRight.getDistance()+rearLeft.getDistance())/4.0; 
@@ -186,4 +187,18 @@ public class Robot extends SampleRobot{
 		frontRight.set(value);
 		rearRight.set(value);
 	}
+	Thread YAccel = new Thread(){
+		public void run(){
+			while(yRun){
+				if(Math.abs(accel2.getY())>=0.1&&Math.abs(accel2.getX())>=0.1){
+					double angle=Math.toRadians(gyro.getAngle());
+					double trueY=Math.cos(Math.PI/2-angle)*accel2.getX()+Math.cos(angle)*accel.getY();
+					double accel = trueY<=0?trueY+yAccel:trueY-yAccel;
+					double speed = accel*0.05+ySpeed;
+					ySpeed=speed;
+				}
+				Timer.delay(0.05);
+			}
+		}
+	};
 }
