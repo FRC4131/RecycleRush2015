@@ -54,14 +54,14 @@ public class Robot extends SampleRobot{
 					SmartDashboard.putNumber("TimeRL", durationRL);
 					SmartDashboard.putNumber("Sonar (in)", getSonar(true));
 					SmartDashboard.putNumber("Sonar (cm)", getSonar(false));
-					/*SmartDashboard.putString("Front Left Encoder", encFrontLeft.getStopped() ? "Stopped" : encFrontLeft.getDirection() ? "Backward" : "Forward");
-					SmartDashboard.putString("Front Right Encoder", encFrontRight.getStopped() ? "Stopped" : encFrontRight.getDirection() ? "Forward" : "Backward");
-					SmartDashboard.putString("Rear Left Encoder", encRearLeft.getStopped() ? "Stopped" : encRearLeft.getDirection() ? "Backward" : "Forward");
-					SmartDashboard.putString("Rear Right Encoder", encRearRight.getStopped() ? "Stopped" : encRearRight.getDirection() ? "Forward" : "Backward");
-					SmartDashboard.putNumber("Front Left Encoder Value(in)", -encFrontLeft.getDistance());
-					SmartDashboard.putNumber("Front Right Encoder Value(in)", -encFrontRight.getDistance());
-					SmartDashboard.putNumber("Rear Left Encoder Value(in)", -encRearLeft.getDistance());
-					SmartDashboard.putNumber("Rear Right Encoder Value(in)", -encRearRight.getDistance());*/
+					SmartDashboard.putString("Front Left Encoder", frontLeft.isStopped() ? "Stopped" : frontLeft.getDirection() ? "Backward" : "Forward");
+					SmartDashboard.putString("Front Right Encoder", frontRight.isStopped() ? "Stopped" : frontRight.getDirection() ? "Forward" : "Backward");
+					SmartDashboard.putString("Rear Left Encoder", rearRight.isStopped() ? "Stopped" : rearLeft.getDirection() ? "Backward" : "Forward");
+					SmartDashboard.putString("Rear Right Encoder", rearRight.isStopped() ? "Stopped" : rearRight.getDirection() ? "Forward" : "Backward");
+					SmartDashboard.putNumber("Front Left Encoder Value(in)", -frontLeft.getDistance());
+					SmartDashboard.putNumber("Front Right Encoder Value(in)", -frontRight.getDistance());
+					SmartDashboard.putNumber("Rear Left Encoder Value(in)", -rearLeft.getDistance());
+					SmartDashboard.putNumber("Rear Right Encoder Value(in)", -rearRight.getDistance());
 					SmartDashboard.putNumber("Accel X", accel.getX());
 					SmartDashboard.putNumber("Accel Y", accel.getY());
 					SmartDashboard.putNumber("Accel Z", accel.getZ());
@@ -89,7 +89,7 @@ public class Robot extends SampleRobot{
 		}.start();
 	}
 	public void autonomous(){
-		
+		changeY(-1);
 	}
 	public void operatorControl(){
 		while(isOperatorControl() && isEnabled()){
@@ -129,10 +129,11 @@ public class Robot extends SampleRobot{
 		
 	}
 	private void changeY(double feet){
-//		double xi=0;
-//		double accelvalues;
-//		yRun = true;
-//		drive.mecanumDrive_Cartesian(0, 0.4, 0, gyro.getAngle());
+		double y = yDist;//Starting y position
+		while(Math.abs(yDist - y) < Math.abs(feet)){
+			drive.mecanumDrive_Cartesian(0, Math.copySign(0.2, feet), 0, gyro.getAngle());
+			Timer.delay(0.005);
+		}
 	}
 	private double avgDistance(){
 		return (frontLeft.getDistance()+frontRight.getDistance()+rearRight.getDistance()+rearLeft.getDistance())/4.0; 
@@ -191,11 +192,17 @@ public class Robot extends SampleRobot{
 		public void run(){
 			while(yRun){
 				if(Math.abs(accel2.getY())>=0.1&&Math.abs(accel2.getX())>=0.1){
-					double angle=Math.toRadians(gyro.getAngle());
-					double trueY=Math.cos(Math.PI/2-angle)*accel2.getX()+Math.cos(angle)*accel.getY();
-					double accel = trueY<=0?trueY+yAccel:trueY-yAccel;
-					double speed = accel*0.05+ySpeed;
-					ySpeed=speed;
+					double angle=Math.toRadians(gyro.getAngle());//Angle, in radians, that we have turned
+					//absX is the speed at which the robot is moving sideways, relative to the drive table (gyro.getAngle()==0)
+					xAccel = Math.sin(angle) * accel2.getX()//Motion from moving sideways relative to the robot
+							+ Math.sin(Math.PI/2 - angle) * accel2.getY();//Motion from moving forward relative to the robot
+					xSpeed += xAccel;//The speed that the robot is moving sideways relative to the drive table
+					xDist += xSpeed;//The distance the robot has traveled sideways relative to the drive table
+					//absY is the speed at which the robot is moving forward, relative to the drive table (gyro.getAngle()==0)
+					yAccel = Math.cos(angle) * accel2.getY()//Motion from moving forward relative to the robot
+							+ Math.cos(Math.PI/2 - angle) * accel2.getX();//Motion from moving sideways relative to the robot
+					xSpeed += yAccel;
+					yDist += ySpeed;
 				}
 				Timer.delay(0.05);
 			}
