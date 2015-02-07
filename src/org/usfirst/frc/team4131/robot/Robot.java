@@ -17,23 +17,17 @@ import edu.wpi.first.wpilibj.interfaces.Accelerometer.Range;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot{
-	public double durationFL;
-	public double durationFR;
-	public double durationRL;
-	public double durationRR;
-	public boolean xRun, yRun;
-	public double yAccel, xAccel;
-	public double ySpeed, xSpeed;
-	public double yDist,xDist;
-//	private final double CIRCUMFERENCE = 25.1327;//Circumference of each wheel
-	private PIDTalon frontLeft = new PIDTalon(1, 0, 1,250, false), rearLeft = new PIDTalon(2, 2, 3,360, false), frontRight = new PIDTalon(3, 4, 5, 250, true), rearRight = new PIDTalon(4, 6, 7, 360, true);
+	public volatile double xAccel, yAccel;
+	public volatile double xSpeed, ySpeed;
+	public volatile double xDist, yDist;
+	private PIDTalon frontLeft = new PIDTalon(1, 0, 1, 250, true), rearLeft = new PIDTalon(2, 2, 3, 360, true), frontRight = new PIDTalon(3, 4, 5, 250, false), rearRight = new PIDTalon(4, 6, 7, 290, false);
 	private RobotDrive drive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
 	private Joystick controller = new Joystick(0), io = new Joystick(1);
 	private JoystickButton buttonReset = new JoystickButton(controller, 2), buttonCenter = new JoystickButton(controller, 3);//B, X
 //	private Encoder encFrontLeft = new Encoder(0, 1), encRearLeft = new Encoder(2, 3), encFrontRight = new Encoder(4, 5), encRearRight = new Encoder(6, 7);
 	private AnalogInput sonar = new AnalogInput(0);
 	private final double SONAR_MULT = sonar.getLSBWeight() * Math.exp(-9);//These two values and calculations are from the Javadoc
-	private final double SONAR_OFFSET = sonar.getOffset() * Math.exp(-9);//of 
+	private final double SONAR_OFFSET = sonar.getOffset() * Math.exp(-9);//of AnalogInput.getVoltage().
 	private Accelerometer accel = new BuiltInAccelerometer();
 	private ADXL345_SPI accel2 = new ADXL345_SPI(SPI.Port.kOnboardCS0, Range.k16G);//x is side to side, y is forward and back, and z is verticallity
 	private Gyro gyro = new Gyro(1);
@@ -48,10 +42,6 @@ public class Robot extends SampleRobot{
 			@Override
 			public void run(){
 				while(true){
-					SmartDashboard.putNumber("TimeFL", durationFL);
-					SmartDashboard.putNumber("TimeFR", durationFR);
-					SmartDashboard.putNumber("TimeRR", durationRR);
-					SmartDashboard.putNumber("TimeRL", durationRL);
 					SmartDashboard.putNumber("Sonar (in)", getSonar(true));
 					SmartDashboard.putNumber("Sonar (cm)", getSonar(false));
 					SmartDashboard.putString("Front Left Encoder", frontLeft.isStopped() ? "Stopped" : frontLeft.getDirection() ? "Backward" : "Forward");
@@ -73,10 +63,6 @@ public class Robot extends SampleRobot{
 					SmartDashboard.putNumber("Temperature (C)", getTemp(true));
 					SmartDashboard.putNumber("Temperature (F)", getTemp(false));
 					if(buttonReset.get()){
-						/*encFrontLeft.reset();
-						encFrontRight.reset();
-						encRearRight.reset();
-						encRearLeft.reset();*/
 						frontLeft.reset();
 						rearLeft.reset();
 						frontRight.reset();
@@ -87,9 +73,11 @@ public class Robot extends SampleRobot{
 				}
 			}
 		}.start();
+		threadAccel.start();
 	}
 	public void autonomous(){
-		changeY(-1);
+//		moveStraight(2);
+		move(1);
 	}
 	public void operatorControl(){
 		while(isOperatorControl() && isEnabled()){
@@ -116,6 +104,21 @@ public class Robot extends SampleRobot{
 			drive(-0.2);
 			if(ticks % 20 == 0) PIDTalon.equalize();
 			ticks++;
+			Timer.delay(0.005);
+		}
+	}
+	@Override
+	public void disabled(){
+		while(isDisabled()){
+			SmartDashboard.putNumber("Accel X", accel.getX());
+			SmartDashboard.putNumber("Accel Y", accel.getY());
+			SmartDashboard.putNumber("Accel Z", accel.getZ());
+			SmartDashboard.putNumber("Auto - Accel X", xAccel);
+			SmartDashboard.putNumber("Auto - Speed X", xSpeed);
+			SmartDashboard.putNumber("Auto - Dist X", xDist);
+			SmartDashboard.putNumber("Auto - Accel Y", yAccel);
+			SmartDashboard.putNumber("Auto - Speed Y", ySpeed);
+			SmartDashboard.putNumber("Auto - Dist Y", yDist);
 			Timer.delay(0.005);
 		}
 	}
@@ -156,15 +159,24 @@ public class Robot extends SampleRobot{
 		final double xf = xi+(feet*12);//converting feet to in.
 		while(inversion?xf<xi:xi<xf){
 			if((inversion?xi-xf:xf-xi)>36){//if three feet or more, move fast
-				drive.arcadeDrive(inversion?-1.0:1.0, 0, false);
+				drive.arcadeDrive(inversion?-0.5:0.5, 0, false);
 			}else if((inversion?xi-xf:xf-xi)<=36&&(inversion?xi-xf:xf-xi)>18){//if between 1.5ft to 3ft
-				drive.arcadeDrive(inversion?-0.5:0.5,0,false);
+				drive.arcadeDrive(inversion?-0.3:0.3,0,false);
 			}else{
 				drive.arcadeDrive(inversion?-0.2:0.2,0,false);
 			}
 			xi=avgDistance();
 		}
-		drive.arcadeDrive(0,0,false);//kill or stop
+		drive.arcadeDrive(0, 0, false);//kill or stop
+	}
+	private void move(double feet){
+		double start = avgDistance();
+		while(Math.abs(avgDistance()) < Math.abs(feet*12-start)){
+			PIDTalon.equalize();
+			drive.drive(Math.copySign(0.2, feet), 0);
+			Timer.delay(0.005);
+		}
+		drive.drive(0, 0);
 	}
 	private void addRotate(double angle){
 		boolean incomplete = true;
@@ -188,23 +200,26 @@ public class Robot extends SampleRobot{
 		frontRight.set(value);
 		rearRight.set(value);
 	}
-	Thread YAccel = new Thread(){
+	Thread threadAccel = new Thread(){
 		public void run(){
-			while(yRun){
-				if(Math.abs(accel2.getY())>=0.1&&Math.abs(accel2.getX())>=0.1){
+			double deadband = 0.09;
+			while(true){
+				accel2.updateTable();
+				if(Math.abs(accel2.getY())>=deadband || Math.abs(accel2.getX())>=deadband){
 					double angle=Math.toRadians(gyro.getAngle());//Angle, in radians, that we have turned
 					//absX is the speed at which the robot is moving sideways, relative to the drive table (gyro.getAngle()==0)
 					xAccel = Math.sin(angle) * accel2.getX()//Motion from moving sideways relative to the robot
 							+ Math.sin(Math.PI/2 - angle) * accel2.getY();//Motion from moving forward relative to the robot
-					xSpeed += xAccel;//The speed that the robot is moving sideways relative to the drive table
+					xSpeed = Math.copySign(xSpeed + xAccel, xAccel);//The speed that the robot is moving sideways relative to the drive table
 					xDist += xSpeed;//The distance the robot has traveled sideways relative to the drive table
+					
 					//absY is the speed at which the robot is moving forward, relative to the drive table (gyro.getAngle()==0)
 					yAccel = Math.cos(angle) * accel2.getY()//Motion from moving forward relative to the robot
 							+ Math.cos(Math.PI/2 - angle) * accel2.getX();//Motion from moving sideways relative to the robot
-					xSpeed += yAccel;
+					ySpeed = Math.copySign(ySpeed + yAccel, yAccel);//The speed that the robot is moving sideways relative to the drive table
 					yDist += ySpeed;
 				}
-				Timer.delay(0.05);
+				Timer.delay(0.005);
 			}
 		}
 	};
