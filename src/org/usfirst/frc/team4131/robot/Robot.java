@@ -94,15 +94,9 @@ public class Robot extends SampleRobot{
 			Timer.delay(0.005);
 		}
 	}
-	private void strafe(double inches){
-		double start = drive.getMotor(0).getDistance();
-		while(Math.abs(drive.getMotor(0).getDistance()) - Math.abs(start) < Math.abs(inches)){
-//			drive.drive(Math.copySign(0.2, inches), 0, 0, false);
-			drive.getMotor(0).set(Math.copySign(0.2, inches));
-			drive.getMotor(1).set(Math.copySign(0.2, -inches));
-			drive.getMotor(2).set(Math.copySign(0.2, inches));
-			drive.getMotor(3).set(Math.copySign(0.2, -inches));
-			Timer.delay(0.005);
-		}
+	//Coordinates are in inches, and relative to the robot's position.
+	private void go(double x, double y){
+		double ratio = y/x;
+		drive.drive(0.2, 0.2*ratio, 0, false);
 	}
 }
