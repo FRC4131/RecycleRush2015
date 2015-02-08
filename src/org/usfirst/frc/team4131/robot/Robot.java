@@ -36,12 +36,23 @@ public class Robot extends SampleRobot{
 		}.start();
 	}
 	public void autonomous(){
-//		move(-24);
-//		turn(90);
-//		move(-24);
-//		turn(-90);
-//		move(-24);
-		strafe(-24);
+		Thread thread = new Thread(){
+			@Override
+			public void run(){
+				move(-36);
+				turn(-90);
+				move(-36);
+				turn(90);
+				move(-24);
+				turn(-90);
+				move(-60);
+				turn(-65);
+				move(-54);
+			}
+		};
+		thread.start();
+		while(isEnabled() && isAutonomous()) Timer.delay(0.005);
+		if(thread.isAlive()) thread.stop();
 		drive.stop();
 	}
 	public void operatorControl(){
@@ -68,6 +79,7 @@ public class Robot extends SampleRobot{
 		}
 	}
 	private void move(double inches){
+		inches = Math.copySign(Math.abs(inches)-9, inches);
 		double start = drive.getMotor(0).getDistance();
 		while(Math.abs(drive.getMotor(0).getDistance() - start) < Math.abs(inches)){
 			drive.drive(0, Math.copySign(0.2, inches), 0, false);
@@ -82,5 +94,15 @@ public class Robot extends SampleRobot{
 			Timer.delay(0.005);
 		}
 	}
-
+	private void strafe(double inches){
+		double start = drive.getMotor(0).getDistance();
+		while(Math.abs(drive.getMotor(0).getDistance()) - Math.abs(start) < Math.abs(inches)){
+//			drive.drive(Math.copySign(0.2, inches), 0, 0, false);
+			drive.getMotor(0).set(Math.copySign(0.2, inches));
+			drive.getMotor(1).set(Math.copySign(0.2, -inches));
+			drive.getMotor(2).set(Math.copySign(0.2, inches));
+			drive.getMotor(3).set(Math.copySign(0.2, -inches));
+			Timer.delay(0.005);
+		}
+	}
 }
