@@ -16,7 +16,7 @@ public class PIDTalon extends CANTalon{
 	private double mult = 1;//Multiplier set by equalizer
 	public PIDTalon(int motor, int enc1, int enc2, double ticks, boolean invMotor, boolean invEnc){
 		super(motor);
-		enableBrakeMode(false);
+		enableBrakeMode(true);
 		encoder = new Encoder(enc1, enc2);
 		encoder.setDistancePerPulse(CIRCUMFERENCE/ticks);
 		this.invMotor = invMotor;
@@ -25,7 +25,7 @@ public class PIDTalon extends CANTalon{
 	}
 	@Override
 	public void set(double speed){
-		super.set((invMotor ? -1 : 1) * speed);// * mult);
+		super.set((invMotor ? -1 : 1) * speed * mult);
 		if(speed!=0) ratio = Math.abs((encoder.getDistance()-prevValue) / speed);//Distance per power unit; constant for any power set
 		prevValue = encoder.getDistance();
 	}

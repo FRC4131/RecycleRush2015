@@ -42,6 +42,9 @@ public class Sensors implements Runnable{
 	public double gyroAngle(){return gyro.getAngle();}
 	public double tempC(){return (temp.getVoltage()-2.5)*9 + 25;}
 	public double tempF(){return 1.8 * tempC() + 32;}
+	public void reset(){
+		gyro.reset();
+	}
 	@Override
 	public void run(){
 		SmartDashboard.putNumber("AccX", getAcceleration('x'));
