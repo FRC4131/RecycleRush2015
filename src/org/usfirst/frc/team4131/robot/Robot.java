@@ -61,11 +61,13 @@ public class Robot extends SampleRobot{
 			double x = oi.getX();//Round to nearest 0.05
 			double y = oi.getY();
 			double rotation = oi.getRotation();
-			if(oi.getButton(Button.X)){
-				double angDif = -sensors.gyroAngle();
-				if(angDif<1) rotation = 0;
-				else if(angDif<15) rotation = Math.copySign(0.1, angDif);
-				else rotation = Math.copySign(0.3, -sensors.gyroAngle() % 360);
+			if(oi.getPOV() > -1){//+Pad pressed
+				double angle = sensors.gyroAngle();
+				while(angle<0) angle+=360;
+				double angDif = oi.getPOV()-sensors.gyroAngle();
+				if(Math.abs(angDif)<1) rotation = 0;
+				else if(Math.abs(angDif)<15) rotation = Math.copySign(0.1, -angDif);
+				else rotation = Math.copySign(0.3, -angDif);
 			}
 			drive.drive(x, y, rotation, true);
 //			PIDTalon.equalize();
