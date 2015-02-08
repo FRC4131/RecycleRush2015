@@ -2,67 +2,54 @@ package org.usfirst.frc.team4131.robot;
 
 import edu.wpi.first.wpilibj.ADXL345_SPI;
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.BuiltInAccelerometer;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.interfaces.Accelerometer;
+import edu.wpi.first.wpilibj.interfaces.Accelerometer.Range;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Sensors{
+public class Sensors implements Runnable{
+	private final double SONAR_MULT, SONAR_OFFSET;//These two values and calculations are from the Javadoc of AnalogInput.getVoltage().
 	private ADXL345_SPI accEx;
-	private BuiltInAccelerometer accIn = new BuiltInAccelerometer();
-	private AnalogInput sonar = new AnalogInput(0);
-	private final double SONAR_MULT = sonar.getLSBWeight() * Math.exp(-9);//These two values and calculations are from the Javadoc
-	private final double SONAR_OFFSET = sonar.getOffset() * Math.exp(-9);//of getVoltage().
-	private Gyro gyro = new Gyro(1);
-	private AnalogInput temp = new AnalogInput(2);
-	private UpdateThread dashboard = new UpdateThread();
-	public Sensors(SPI.Port accel, int sonar, int gyro, int temp){
-		this.accEx = new ADXL345_SPI(accel, Accelerometer.Range.k16G);
+//	private BuiltInAccelerometer accIn = new BuiltInAccelerometer();
+	private AnalogInput sonar, temp;
+	private Gyro gyro;
+	public Sensors(int accel, int sonar, int gyro, int temp){
+		switch(accel){
+			case(0): accEx = new ADXL345_SPI(SPI.Port.kOnboardCS0, Range.k16G); break;
+			case(1): accEx = new ADXL345_SPI(SPI.Port.kOnboardCS1, Range.k16G); break;
+			case(2): accEx = new ADXL345_SPI(SPI.Port.kOnboardCS2, Range.k16G); break;
+			case(3): accEx = new ADXL345_SPI(SPI.Port.kOnboardCS3, Range.k16G); break;
+			case(4): accEx = new ADXL345_SPI(SPI.Port.kMXP, Range.k16G); break;
+		}
 		this.sonar = new AnalogInput(sonar);
+		SONAR_MULT = this.sonar.getLSBWeight() * Math.exp(-9);
+		SONAR_OFFSET = this.sonar.getOffset() * Math.exp(-9);
 		this.gyro = new Gyro(gyro);
 		this.temp = new AnalogInput(temp);
-		dashboard.start();
+//		new Thread(this).start();
 	}
-	public double getAngle(){return gyro.getAngle();}
-	public double getAcceleration(boolean external, char axis){
-		Accelerometer accel = external ? this.accEx : accIn;
+	public double getAcceleration(char axis){
+		accEx.updateTable();
 		switch(axis){
-			case('x'): return accel.getX();
-			case('y'): return accel.getY();
-			case('z'): return accel.getZ();
+			case('x'): case('X'): return accEx.getX();
+			case('y'): case('Y'):return accEx.getY();
+			case('z'): case('Z'):return accEx.getZ();
 			default: return 0;
 		}
 	}
-	public double getSonar(boolean inches){return (sonar.getVoltage() * SONAR_MULT - SONAR_OFFSET) * 0.28 * (inches ? 1 : 2.54);}
-	public double getTemp(boolean celsius){
-		double c = ((temp.getVoltage()-2.5)*9 + 25);
-		if(celsius) return c;
-		return 1.8*c + 32;
-	}
-	private class UpdateThread extends Thread{
-		@Override
-		public void run(){
-			while(true){
-				SmartDashboard.putNumber("Sonar (in)", getSonar(true));
-				SmartDashboard.putNumber("Sonar (cm)", getSonar(false));
-				SmartDashboard.putNumber("Accel X", accEx.getX());
-				SmartDashboard.putNumber("Accel Y", accEx.getY());
-				SmartDashboard.putNumber("Accel Z", accEx.getZ());
-				accEx.updateTable();
-				SmartDashboard.putNumber("Accel 2 X", accIn.getX());
-				SmartDashboard.putNumber("Accel 2 Y", accIn.getY());
-				SmartDashboard.putNumber("Accel 2 Z", accIn.getZ());
-				SmartDashboard.putNumber("Gyro", gyro.getAngle());
-				SmartDashboard.putNumber("Temperature (C)", getTemp(true));
-				SmartDashboard.putNumber("Temperature (F)", getTemp(false));
-				SmartDashboard.putNumber("Battery Voltage", DriverStation.getInstance().getBatteryVoltage());
-				SmartDashboard.putBoolean("Button", Robot.oi.getIOSwitch(2));
-				Timer.delay(0.005);
-			}
-		
-		}
+	public double sonarIn(){return (sonar.getVoltage() * SONAR_MULT - SONAR_OFFSET) * 0.28;}
+	public double sonarCm(){return 2.54 * sonarIn();}
+	public double gyroAngle(){return gyro.getAngle();}
+	public double tempC(){return (temp.getVoltage()-2.5)*9 + 25;}
+	public double tempF(){return 1.8 * tempC() + 32;}
+	@Override
+	public void run(){
+		SmartDashboard.putNumber("AccX", getAcceleration('x'));
+		SmartDashboard.putNumber("AccY", getAcceleration('y'));
+		SmartDashboard.putNumber("AccZ", getAcceleration('z'));
+		SmartDashboard.putNumber("Sonar (in)", sonarIn());
+		SmartDashboard.putNumber("Gyro", gyroAngle());
+		SmartDashboard.putNumber("Temp (C)", tempC());
+		SmartDashboard.putNumber("Temp (F)", tempF());
 	}
 }
