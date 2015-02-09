@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot{
+	private double curX,curY,curAngle;
 	private Sensors sensors = new Sensors(0, 0, 1, 2);
 	private DriveBase drive = new DriveBase(sensors, new PIDTalon(1, 0, 1, 250, true, true), new PIDTalon(2, 2, 3, 360, true, true),
 			new PIDTalon(3, 4, 5, 250, true, false), new PIDTalon(4, 6, 7, 305, true, false));
@@ -38,7 +39,8 @@ public class Robot extends SampleRobot{
 	public void autonomous(){
 		SmartDashboard.putString("Status", "Running");
 		Thread thread = new Thread(){
-			public void run(){try{
+			public void run(){
+//				try{
 				/*move(-36);
 				turn(-90);
 				move(-36);
@@ -48,14 +50,26 @@ public class Robot extends SampleRobot{
 				move(-60);
 				turn(-65);
 				move(-54);*/
-				int index = 0;
-				go(36, 0, index++);
-				go(-36, 0, index++);
-				go(24, 0, index++);
-				go(-60, 0, index++);
-				go(52, -30.5, index++);
-				drive.stop();
-			}catch(InterruptedException ex){drive.stop(); SmartDashboard.putString("Status", "Interrupted");}}//If autonomous ends, InterruptedException is thrown.
+				curY=47;
+				curX=-3;
+				curAngle=90;
+				double movementDemo[]={
+					36,0,
+					38,37.5,
+					60.5,37.5,
+					60,98,
+					7,129
+				};
+				goTo(movementDemo);
+//				int index = 0;
+//				go(36, 0, index++);
+//				go(-36, 0, index++);
+//				go(24, 0, index++);
+//				go(-60, 0, index++);
+//				go(52, -30.5, index++);
+//				drive.stop();
+//			}catch(InterruptedException ex){drive.stop(); SmartDashboard.putString("Status", "Interrupted");}}//If autonomous ends, InterruptedException is thrown.
+			}
 		};
 		thread.start();
 		while(isEnabled() && isAutonomous()) Timer.delay(0.005);
@@ -96,12 +110,12 @@ public class Robot extends SampleRobot{
 			Timer.delay(0.005);
 		}
 	}
-	private void turn(int degrees) throws InterruptedException{
+	private void turn(double angle) throws InterruptedException{
 		int start = (int)sensors.gyroAngle();
-		degrees = (int)Math.copySign(Math.abs(degrees) -5, degrees);
-		double diff = degrees;
+		angle = (int)Math.copySign(Math.abs(angle) -5, angle);
+		double diff = angle;
 		while(Math.abs(diff) > 1){
-			diff = degrees - (sensors.gyroAngle() - start);
+			diff = angle - (sensors.gyroAngle() - start);
 			SmartDashboard.putNumber("Diff", diff);
 			drive.drive(0, 0, Math.copySign(0.2, diff), false);
 			if(Thread.interrupted()) throw new InterruptedException();
@@ -116,5 +130,40 @@ public class Robot extends SampleRobot{
 		SmartDashboard.putNumber("Distance " + index, distance);
 		turn((int)angle);
 		move(distance);
+	}
+
+	public void goTo(double...coordinates){
+		if(coordinates.length%2==1){
+			return;//coordinates must be in pairs!
+		}
+		int counter=0;
+		double x=0,y=0;
+		boolean settingX=true,settingY=true;
+		for(double coord:coordinates){
+			if(counter%2==0&&settingX){
+				x=coord-curX;
+				settingX=false;
+			}else if(counter%2==1&&settingY){
+				y=coord-curY;
+				settingY=false;
+			}
+			if(!(settingX||settingY)){
+				double angle = Math.toDegrees(Math.asin(x/Math.pow((x*x+y*y),0.5)));
+				angle=angle-curAngle;
+				try {
+					turn(angle);
+					move(-Math.pow(x*x+y*y, 0.5));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				curAngle=curAngle+angle;
+				curX=curX+x;
+				curY=curY+y;
+				System.out.println("position:("+curX+","+curY+")");
+				settingX=true;
+				settingY=true;
+			}
+			counter++;
+		}
 	}
 }
