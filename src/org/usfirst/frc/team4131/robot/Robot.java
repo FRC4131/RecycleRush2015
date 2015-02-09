@@ -36,10 +36,10 @@ public class Robot extends SampleRobot{
 		}.start();
 	}
 	public void autonomous(){
+		SmartDashboard.putString("Status", "Running");
 		Thread thread = new Thread(){
-			@Override
-			public void run(){
-				move(-36);
+			public void run(){try{
+				/*move(-36);
 				turn(-90);
 				move(-36);
 				turn(90);
@@ -47,12 +47,19 @@ public class Robot extends SampleRobot{
 				turn(-90);
 				move(-60);
 				turn(-65);
-				move(-54);
-			}
+				move(-54);*/
+				int index = 0;
+				go(36, 0, index++);
+				go(-36, 0, index++);
+				go(24, 0, index++);
+				go(-60, 0, index++);
+				go(52, -30.5, index++);
+				drive.stop();
+			}catch(InterruptedException ex){drive.stop(); SmartDashboard.putString("Status", "Interrupted");}}//If autonomous ends, InterruptedException is thrown.
 		};
 		thread.start();
 		while(isEnabled() && isAutonomous()) Timer.delay(0.005);
-		if(thread.isAlive()) thread.stop();
+		if(thread.isAlive()) thread.interrupt();
 		drive.stop();
 	}
 	public void operatorControl(){
@@ -80,25 +87,34 @@ public class Robot extends SampleRobot{
 			Timer.delay(0.005);
 		}
 	}
-	private void move(double inches){
-		inches = Math.copySign(Math.abs(inches)-9, inches);
+	private void move(double inches) throws InterruptedException{
 		double start = drive.getMotor(0).getDistance();
+		inches = Math.copySign(Math.abs(inches) - 6, inches);
 		while(Math.abs(drive.getMotor(0).getDistance() - start) < Math.abs(inches)){
 			drive.drive(0, Math.copySign(0.2, inches), 0, false);
+			if(Thread.interrupted()) throw new InterruptedException();
 			Timer.delay(0.005);
 		}
 	}
-	private void turn(int degrees){
-		degrees = (int)Math.copySign(Math.abs(degrees)-10, degrees);//Sign-independent version of 'degrees-=10'. It usually overshoots.
-		double start = sensors.gyroAngle();
-		while(Math.abs(sensors.gyroAngle() - start) < Math.abs(degrees)){
-			drive.drive(0, 0, Math.copySign(0.2, degrees), false);
+	private void turn(int degrees) throws InterruptedException{
+		int start = (int)sensors.gyroAngle();
+		degrees = (int)Math.copySign(Math.abs(degrees) -5, degrees);
+		double diff = degrees;
+		while(Math.abs(diff) > 1){
+			diff = degrees - (sensors.gyroAngle() - start);
+			SmartDashboard.putNumber("Diff", diff);
+			drive.drive(0, 0, Math.copySign(0.2, diff), false);
+			if(Thread.interrupted()) throw new InterruptedException();
 			Timer.delay(0.005);
 		}
 	}
 	//Coordinates are in inches, and relative to the robot's position.
-	private void go(double x, double y){
-		double ratio = y/x;
-		drive.drive(0.2, 0.2*ratio, 0, false);
+	private void go(double x, double y, int index) throws InterruptedException{
+		double angle = Math.toDegrees(Math.atan(x/y));
+		double distance = -Math.sqrt(x*x + y*y);
+		SmartDashboard.putNumber("Angle " + index, angle);
+		SmartDashboard.putNumber("Distance " + index, distance);
+		turn((int)angle);
+		move(distance);
 	}
 }
