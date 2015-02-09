@@ -148,7 +148,7 @@ public class Robot extends SampleRobot{
 				settingY=false;
 			}
 			if(!(settingX||settingY)){
-				double angle = Math.toDegrees(Math.asin(x/Math.pow((x*x+y*y),0.5)));
+				double angle = Math.toDegrees(Math.atan2(x,y));
 				angle=angle-curAngle;
 				try {
 					turn(angle);
@@ -156,9 +156,9 @@ public class Robot extends SampleRobot{
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				curAngle=curAngle+angle;
-				curX=curX+x;
-				curY=curY+y;
+				curAngle+=angle;
+				curX+=x;
+				curY+=y;
 				System.out.println("position:("+curX+","+curY+")");
 				settingX=true;
 				settingY=true;
