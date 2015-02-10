@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends SampleRobot{
 	private double curX,curY,curAngle;
 	private Sensors sensors = new Sensors(0, 0, 1, 2);
-	private DriveBase drive = new DriveBase(sensors, new PIDTalon(1, 0, 1, 250, true, true), new PIDTalon(2, 2, 3, 360, true, true),
-			new PIDTalon(3, 4, 5, 250, true, false), new PIDTalon(4, 6, 7, 305, true, false));
+	private DriveBase drive = new DriveBase(sensors, new PIDTalon(3, 4, 5, 250, true, false)/*FR*/,new PIDTalon(1, 0, 1, 250, true, true)/*FL*/,
+	new PIDTalon(4, 6, 7, 305, true, false)/*RR*/, new PIDTalon(2, 2, 3, 360, true, true)/*RL*/);//RE-ARRANGE
 	private OI oi = new OI(0);
 	public Robot(){
 		new Thread(){
@@ -50,17 +50,37 @@ public class Robot extends SampleRobot{
 				move(-60);
 				turn(-65);
 				move(-54);*/
-				curY=47;
-				curX=-3;
-				curAngle=90;
-				double movementDemo[]={
-					36,0,
-					38,37.5,
-					60.5,37.5,
-					60,98,
-					7,129
+				curY=0;
+				curX=0;
+				curAngle=0;
+				double coords []={
+						-12,12,
+						0,36,
+						-24,60,
+						-60,24,
+						-60,72,
+						0,96,
+						0,48,
+						-48,48,
+						-48,72};
+				double demoCoord[]={
+						1,1,
+						1,5,
+						5,5,
+						5,1
 				};
-				goTo(movementDemo);
+				goTo(demoCoord);
+//				curY=47;
+//				curX=-3;
+//				curAngle=90;
+//				double movementDemo[]={
+//					36,0,
+//					38,37.5,
+//					60.5,37.5,
+//					60,98,
+//					7,129
+//				};
+//				goTo(movementDemo);
 //				int index = 0;
 //				go(36, 0, index++);
 //				go(-36, 0, index++);
@@ -152,7 +172,7 @@ public class Robot extends SampleRobot{
 				angle=angle-curAngle;
 				try {
 					turn(angle);
-					move(-Math.pow(x*x+y*y, 0.5));
+					move(Math.pow(x*x+y*y, 0.5));
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

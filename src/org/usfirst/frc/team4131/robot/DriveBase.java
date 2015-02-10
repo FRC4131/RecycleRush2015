@@ -18,7 +18,7 @@ public class DriveBase{
 		drive.setInvertedMotor(MotorType.kRearRight, false);
 	}
 	public void drive(double x, double y, double rotation, boolean driverOriented){
-		drive.mecanumDrive_Cartesian(x, y, rotation, driverOriented ? sensors.gyroAngle() : 0);
+		drive.mecanumDrive_Cartesian(x, -y, rotation, driverOriented ? sensors.gyroAngle() : 0);
 	}
 	public void stop(){drive(0, 0, 0, false);}
 	public PIDTalon getMotor(int index){return talons[index];}
