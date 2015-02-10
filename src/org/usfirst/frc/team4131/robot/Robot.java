@@ -102,13 +102,12 @@ public class Robot extends SampleRobot{
 			double x = oi.getX();//Round to nearest 0.05
 			double y = oi.getY();
 			double rotation = oi.getRotation();
-			if(oi.getPOV() > -1){//+Pad pressed
-				double angle = sensors.gyroAngle();
-				while(angle<0) angle+=360;
-				double angDif = oi.getPOV()-sensors.gyroAngle();
-				if(Math.abs(angDif)<1) rotation = 0;
-				else if(Math.abs(angDif)<15) rotation = Math.copySign(0.1, -angDif);
-				else rotation = Math.copySign(0.3, -angDif);
+			SmartDashboard.putNumber("POV", oi.getPOV());
+			if(oi.getPOV() > -1){
+				int diff = (int)(oi.getPOV() - sensors.gyroAngle() % 360);
+				while(diff<-360) diff+=360;
+				while(diff>360) diff-=360;
+				SmartDashboard.putNumber("diff", diff);
 			}
 			drive.drive(x, y, rotation, true);
 //			PIDTalon.equalize();
@@ -145,7 +144,7 @@ public class Robot extends SampleRobot{
 	//Coordinates are in inches, and relative to the robot's position.
 	private void go(double x, double y, int index) throws InterruptedException{
 		double angle = Math.toDegrees(Math.atan(x/y));
-		double distance = -Math.sqrt(x*x + y*y);
+		double distance = Math.sqrt(x*x + y*y);
 		SmartDashboard.putNumber("Angle " + index, angle);
 		SmartDashboard.putNumber("Distance " + index, distance);
 		turn((int)angle);
