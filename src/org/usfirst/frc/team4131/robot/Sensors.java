@@ -5,9 +5,8 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer.Range;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Sensors implements Runnable{
+public class Sensors{
 	private final double SONAR_MULT, SONAR_OFFSET;//These two values and calculations are from the Javadoc of AnalogInput.getVoltage().
 	private ADXL345_SPI accEx;
 //	private BuiltInAccelerometer accIn = new BuiltInAccelerometer();
@@ -26,7 +25,6 @@ public class Sensors implements Runnable{
 		SONAR_OFFSET = this.sonar.getOffset() * Math.exp(-9);
 		this.gyro = new Gyro(gyro);
 		this.temp = new AnalogInput(temp);
-//		new Thread(this).start();
 	}
 	public double getAcceleration(char axis){
 		accEx.updateTable();
@@ -44,15 +42,6 @@ public class Sensors implements Runnable{
 	public double tempF(){return 1.8 * tempC() + 32;}
 	public void reset(){
 		gyro.reset();
-	}
-	@Override
-	public void run(){
-		SmartDashboard.putNumber("AccX", getAcceleration('x'));
-		SmartDashboard.putNumber("AccY", getAcceleration('y'));
-		SmartDashboard.putNumber("AccZ", getAcceleration('z'));
-		SmartDashboard.putNumber("Sonar (in)", sonarIn());
-		SmartDashboard.putNumber("Gyro", gyroAngle());
-		SmartDashboard.putNumber("Temp (C)", tempC());
-		SmartDashboard.putNumber("Temp (F)", tempF());
+		
 	}
 }
