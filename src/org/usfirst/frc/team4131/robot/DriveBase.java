@@ -22,10 +22,12 @@ public class DriveBase{
 	public void drive(double x, double y, double rotation, boolean driverOriented){
 		drive.mecanumDrive_Cartesian(x, -y, rotation, driverOriented ? sensors.gyroAngle() : 0);
 	}
+	public void stop(){drive(0, 0, 0, false);}
 	public CANTalon getMotor(int index){return talons[index];}
 	public CANTalon[] getMotors(){return talons;}
 	public boolean isStopped(int index){return encoders[index].getStopped();}
 	public boolean getDirection(int index){return encoders[index].getDirection() != index<2;}//Invert on left side (index<2)
 	public double getDistance(int index){return encoders[index].getDistance() * (index<2 ? -1 : 1);}
 	public double getRate(int index){return encoders[index].getRate() * (index<2 ? -1 : 1);}
+	public void reset(){for(Encoder encoder : encoders) encoder.reset();}
 }

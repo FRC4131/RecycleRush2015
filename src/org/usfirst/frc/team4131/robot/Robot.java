@@ -15,6 +15,19 @@ public class Robot extends SampleRobot implements Runnable{
 		new Thread(this).start();
 	}
 	@Override
+	public void autonomous(){
+		Thread thread = new Thread(){public void run(){try{
+			SmartDashboard.putString("Auton Status", "Start");
+			go(48, 60);
+			SmartDashboard.putString("Auton Status", "Complete");
+			drive.stop();
+		}catch(InterruptedException ex){}}};
+		thread.start();
+		while(isEnabled() && isAutonomous()) Timer.delay(0.005);
+		if(thread.isAlive()) thread.interrupt();
+		drive.stop();
+	}
+	@Override
 	public void operatorControl(){
 		while(isOperatorControl() && isEnabled()){
 			double x = oi.getX(), y = oi.getY(), rotation = oi.getRotation();
@@ -31,13 +44,8 @@ public class Robot extends SampleRobot implements Runnable{
 				else rotation = 0;
 			}
 			drive.drive(x, y, rotation, true);
-			if(oi.getButton(Button.B)) sensors.reset();
 			Timer.delay(0.005);
 		}
-	}
-	@Override
-	public void autonomous(){
-		
 	}
 	@Override
 	public void test(){
@@ -53,7 +61,7 @@ public class Robot extends SampleRobot implements Runnable{
 			SmartDashboard.putNumber("AccX", sensors.getAcceleration('x'));
 			SmartDashboard.putNumber("AccY", sensors.getAcceleration('y'));
 			SmartDashboard.putNumber("AccZ", sensors.getAcceleration('z'));
-			SmartDashboard.putNumber("Sonar (in)", sensors.sonarIn());
+			SmartDashboard.putNumber("Sonar", sensors.sonarIn());
 			SmartDashboard.putNumber("Gyro", sensors.gyroAngle());
 			SmartDashboard.putNumber("Temp (C)", sensors.tempC());
 			SmartDashboard.putNumber("Temp (F)", sensors.tempF());
@@ -64,6 +72,38 @@ public class Robot extends SampleRobot implements Runnable{
 				SmartDashboard.putNumber("Current " + i, drive.getMotor(i).getOutputCurrent());
 			}
 			SmartDashboard.putNumber("Battery", DriverStation.getInstance().getBatteryVoltage());
+			if(oi.getButton(Button.B)){
+				sensors.reset();
+				drive.reset();
+			}
+			Timer.delay(0.005);
+		}
+	}
+	private void turn(int angle) throws InterruptedException{
+		int start = (int)sensors.gyroAngle();
+		double diff;
+		while(Math.abs(diff = angle - (sensors.gyroAngle() - start)) > 1){
+			SmartDashboard.putNumber("Diff", diff);
+			drive.drive(0, 0, Math.copySign(0.2, diff), false);
+			if(Thread.interrupted()) throw new InterruptedException();
+			Timer.delay(0.005);
+		}
+	}
+	private void go(double x, double y) throws InterruptedException{
+		double start = drive.getDistance(3);
+		double diff;
+		while(Math.abs(diff = x - (drive.getDistance(3) - start)) > 1){
+			SmartDashboard.putNumber("Diff", diff);
+			drive.drive(Math.copySign(0.3, x), 0, 0, false);
+			if(Thread.interrupted()) throw new InterruptedException();
+			Timer.delay(0.005);
+		}
+		turn(-(int)sensors.gyroAngle());//Strafing sometimes causes the direction to change; re-center on 0
+		start = drive.getDistance(3);
+		while(Math.abs(diff = y - (drive.getDistance(3) - start)) > 1){
+			SmartDashboard.putNumber("Diff", diff);
+			drive.drive(0, Math.copySign(0.2, y), 0, false);
+			if(Thread.interrupted()) throw new InterruptedException();
 			Timer.delay(0.005);
 		}
 	}
