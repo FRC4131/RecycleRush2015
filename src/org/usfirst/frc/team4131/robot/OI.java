@@ -10,11 +10,7 @@ public class OI{
 		controller = new Joystick(port);
 	}
 	public double getX(){return controller.getRawAxis(0) - (controller.getRawAxis(0) % deadband);}
-<<<<<<< HEAD
 	public double getY(){return -(controller.getRawAxis(1) - (controller.getRawAxis(1) % deadband));}
-=======
-	public double getY(){return -controller.getRawAxis(1) - (controller.getRawAxis(1) % deadband);}
->>>>>>> 1d595f14d69a458c3b3ca5f209a8f4b05c3f10f4
 	public int getPOV(){return controller.getPOV();}
 	public double getRotation(){return controller.getRawAxis(4) - (controller.getRawAxis(4) % deadband);}
 	public boolean getButton(Button button){return controller.getRawButton(button.button);}

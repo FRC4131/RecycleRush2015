@@ -10,8 +10,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends SampleRobot{
 	private double curX,curY,curAngle;
 	private Sensors sensors = new Sensors(0, 0, 1, 2);
-	private DriveBase drive = new DriveBase(sensors, new PIDTalon(3, 4, 5, 250, true, false)/*FR*/,new PIDTalon(1, 0, 1, 250, true, true)/*FL*/,
-	new PIDTalon(4, 6, 7, 305, true, false)/*RR*/, new PIDTalon(2, 2, 3, 360, true, true)/*RL*/);//RE-ARRANGE
+	private PIDTalon frontLeft = new PIDTalon(3, 4, 5, 250, true, false)/*FR*/, rearLeft = new PIDTalon(1, 0, 1, 250, true, true)/*FL*/,
+	frontRight = new PIDTalon(4, 6, 7, 305, true, false)/*RR*/,rearRight= new PIDTalon(2, 2, 3, 360, true, true)/*RL*/;
+	private DriveBase drive = new DriveBase(sensors,frontLeft, rearLeft,frontRight,rearRight);//RE-ARRANGE
 	private OI oi = new OI(0);
 	public Robot(){
 		new Thread(){
@@ -169,15 +170,19 @@ public class Robot extends SampleRobot{
 			if(!(settingX||settingY)){
 				double angle = Math.toDegrees(Math.atan2(x,y));
 				angle=angle-curAngle;
+				double xiAngle = sensors.gyroAngle();
+				double xifl=frontLeft.getDistance(),xirl=rearLeft.getDistance(),xifr=frontRight.getDistance(),xirr=rearRight.getDistance();
 				try {
 					turn(angle);
 					move(Math.pow(x*x+y*y, 0.5));
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				curAngle+=angle;
-				curX+=x;
-				curY+=y;
+				double dfl=frontLeft.getDistance()-xifl,drl=rearLeft.getDistance()-xirl,dfr=frontRight.getDistance()-xifr,drr=rearRight.getDistance()-xirr;
+				double dAngle= sensors.gyroAngle()-xiAngle;
+				curAngle+=dAngle;
+				curX+=Math.sin(Math.toRadians(dAngle))*((dfl+dfr+drl+drr)/4);
+				curY+=Math.cos(Math.toRadians(dAngle))*((dfl+dfr+drl+drr)/4);
 				System.out.println("position:("+curX+","+curY+")");
 				settingX=true;
 				settingY=true;
