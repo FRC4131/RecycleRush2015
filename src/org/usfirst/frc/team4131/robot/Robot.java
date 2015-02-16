@@ -8,9 +8,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot implements Runnable{
-	private static final Point[] STARTING = {new Point(-22, 247), new Point(-26, 165), new Point(-17, 93)};
-	private double x, y;
-	private OI oi = new OI(0);
+	private OI oi = new OI(0, 1);
 	private Sensors sensors = new Sensors(0, 0, 1, 2);
 	private DriveBase drive = new DriveBase(sensors, new int[]{1, 2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8});
 	public Robot(){
@@ -19,9 +17,18 @@ public class Robot extends SampleRobot implements Runnable{
 	@Override
 	public void autonomous(){
 		Thread thread = new Thread(){public void run(){try{
-			int location = DriverStation.getInstance().getLocation() - 1;
-			x=STARTING[location].x;
-			y=STARTING[location].y;
+			drive.unlock();
+			switch(DriverStation.getInstance().getLocation()){
+				case(1):
+					//Left side of the field
+					break;
+				case(2):
+					//Middle of the field
+					break;
+				case(3):
+					//Right side of the field
+					break;
+			}
 			move(75);
 			turn(-90);
 			move(49);
@@ -51,18 +58,8 @@ public class Robot extends SampleRobot implements Runnable{
 	@Override
 	public void operatorControl(){
 		while(isOperatorControl() && isEnabled()){
-			double x = oi.getX(), y = oi.getY(), rotation = oi.getRotation();
-			if(oi.getPOV()>-1){
-				int current = (int)constrain(sensors.gyroAngle());
-				int target = oi.getPOV();
-				int diff = target - current;
-				if(Math.abs(diff) > 180) diff = 360 - diff;
-				if(Math.abs(diff) > 45) rotation = Math.copySign(0.4, diff);
-				else if(Math.abs(diff) > 5) rotation = Math.copySign(0.3, diff);
-				else if(Math.abs(diff) > 1) rotation = Math.copySign(0.1, diff);
-				else rotation = 0;
-			}
-			drive.drive(x, y, rotation, true);
+			if(oi.getButton(true, Button.LEFT_BUMPER)) drive.unlock(); else if(oi.getPOV()>-1) drive.lock(oi.getPOV());
+			drive.drive(oi.getX(), oi.getY(), oi.getRotation(), true);
 			Timer.delay(0.005);
 		}
 	}
@@ -81,7 +78,6 @@ public class Robot extends SampleRobot implements Runnable{
 			SmartDashboard.putNumber("AccZ", sensors.getAcceleration('z'));
 			SmartDashboard.putNumber("Sonar", sensors.sonarIn());
 			SmartDashboard.putNumber("Gyro", sensors.gyroAngle());
-			SmartDashboard.putNumber("Gyro 2", constrain((int)sensors.gyroAngle()));
 			SmartDashboard.putNumber("Temp (C)", sensors.tempC());
 			SmartDashboard.putNumber("Temp (F)", sensors.tempF());
 			for(int i=0;i<drive.getMotors().length;i++){
@@ -91,7 +87,7 @@ public class Robot extends SampleRobot implements Runnable{
 				SmartDashboard.putNumber("Current " + i, drive.getMotor(i).getOutputCurrent());
 			}
 			SmartDashboard.putNumber("Battery", DriverStation.getInstance().getBatteryVoltage());
-			if(oi.getButton(Button.B)){
+			if(oi.getButton(true, Button.B)){
 				sensors.reset();
 				drive.reset();
 			}
@@ -99,28 +95,22 @@ public class Robot extends SampleRobot implements Runnable{
 		}
 	}
 	private void move(double inches) throws InterruptedException{
-		double start = drive.getDistance(1);
+		double start = drive.getDistance(-1);
 		double diff;
-		while(Math.abs(diff = inches - (drive.getDistance(1) - start)) > 15){
+		while(Math.abs(diff = inches - (drive.getDistance(-1) - start)) > 15){
 			drive.drive(0, Math.copySign(0.3, inches), 0, false);
 			SmartDashboard.putNumber("Diff", diff);
 			if(Thread.interrupted()) throw new InterruptedException();
 			Timer.delay(0.005);
 		}
 	}
-	private void turn(double angle) throws InterruptedException{
-		double start = sensors.gyroAngle();
-		double diff;
-		while(Math.abs(diff = angle - (sensors.gyroAngle() - start)) > 1){
-			drive.drive(0, 0, Math.copySign(0.3, diff), false);
-			SmartDashboard.putNumber("Diff", diff);
+	private void turn(int angle) throws InterruptedException{
+		drive.lock(angle - (int)sensors.gyroAngle());
+		while(Math.abs(angle - sensors.gyroAngle()) > 1){
+			drive.drive(0, 0, 0, false);//Let the rotation lock have its way
 			if(Thread.interrupted()) throw new InterruptedException();
 			Timer.delay(0.005);
 		}
-	}
-	private double constrain(double raw){return raw - 360*Math.floor(raw/360);}//Constrain to [0, 360)
-	public static class Point{
-		public final int x, y;
-		public Point(int x, int y){this.x = x; this.y = y;}
-	}
+		drive.unlock();
+	} 
 }
