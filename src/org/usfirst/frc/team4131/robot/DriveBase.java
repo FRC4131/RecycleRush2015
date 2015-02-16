@@ -15,7 +15,7 @@ public class DriveBase{
 			talons[i] = new CANTalon(motors[i]);
 			talons[i].enableBrakeMode(true);
 			this.encoders[i] = new Encoder(encoders[2*i], encoders[2*i + 1]);
-			this.encoders[i].setDistancePerPulse(Math.PI * 16 / 250);//8" wheels (r^2=16), 250 pulses/rev
+			this.encoders[i].setDistancePerPulse(Math.PI * 8 / 250);//8" wheels (r^2=16), 250 pulses/rev
 		}
 		drive = new RobotDrive(talons[0], talons[1], talons[2], talons[3]);
 	}
