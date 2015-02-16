@@ -61,9 +61,6 @@ public class Robot extends SampleRobot implements Runnable{
 				else if(Math.abs(diff) > 5) rotation = Math.copySign(0.3, diff);
 				else if(Math.abs(diff) > 1) rotation = Math.copySign(0.1, diff);
 				else rotation = 0;
-			}else{
-				SmartDashboard.putString("Current", "");
-				SmartDashboard.putString("Target", "");
 			}
 			drive.drive(x, y, rotation, true);
 			Timer.delay(0.005);

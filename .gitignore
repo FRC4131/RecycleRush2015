@@ -6,4 +6,4 @@ build*
 /misc
 .classpath
 .project
-/bin/
+bin/
