@@ -5,11 +5,13 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotDrive;
 
 public class DriveBase{
+	private static final double ramp = 0.60;//Amount to ramp up or down by in each tick
 	private Sensors sensors;
 	private CANTalon[] talons = new CANTalon[4];
 	private Encoder[] encoders = new Encoder[4];
 	private RobotDrive drive;
 	private int lockDir = -1;//0-360; keep the robot in this orientation. -1 is unlocked.
+	private double x, y, rot;//Used for ramping
 	public DriveBase(Sensors sensors, int[] motors, int[] encoders){
 		this.sensors = sensors;
 		for(int i=0;i<motors.length;i++){
@@ -20,12 +22,15 @@ public class DriveBase{
 		}
 		drive = new RobotDrive(talons[0], talons[1], talons[2], talons[3]);
 	}
-	public void drive(double x, double y, double rotation, boolean driverOriented){
-		if(lockDir > -1) rotation = (lockDir - constrain(sensors.gyroAngle())) / 90;
+	public void drive(double x, double y, double rot, boolean driverOriented){
+		x=-x; rot=-rot;
+		if(lockDir > -1) rot = (lockDir - constrain(sensors.gyroAngle())) / 90;
 		x = Math.min(Math.max(x, -1), 1);
 		y = Math.min(Math.max(y, -1), 1);
-		rotation = Math.min(Math.max(rotation, -1), 1);
-		drive.mecanumDrive_Cartesian(x, -y, rotation, driverOriented ? sensors.gyroAngle() : 0);
+		rot = Math.min(Math.max(rot, -1), 1);
+		drive.mecanumDrive_Cartesian(this.x + ramp*(x-this.x), this.y + ramp*(y-this.y), this.rot + ramp*(rot-this.rot),
+				driverOriented ? sensors.gyroAngle() : 0);
+		this.x = x; this.y = y; this.rot = rot;
 	}
 	public void stop(){
 		for(CANTalon talon : talons) talon.set(0);

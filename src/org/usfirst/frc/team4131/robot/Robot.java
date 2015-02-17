@@ -10,10 +10,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends SampleRobot implements Runnable{
 	private OI oi = new OI(0, 1);
 	private Sensors sensors = new Sensors(0, 0, 1, 2);
-	private DriveBase drive = new DriveBase(sensors, new int[]{1, 2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8});
-	public Robot(){
-		new Thread(this).start();
-	}
+	private DriveBase drive = new DriveBase(sensors, new int[]{1, 2, 3, 4}, new int[]{0, 1, 2, 3, 8, 9, 6, 7});//LF, LB, RF, RB
+	private Conveyor conveyor = new Conveyor(0, 1);
+//	private Pneumatics pneumatics = new Pneumatics(6);
+	public Robot(){new Thread(this).start();}
 	@Override
 	public void autonomous(){
 		Thread thread = new Thread(){public void run(){try{
@@ -59,17 +59,25 @@ public class Robot extends SampleRobot implements Runnable{
 	public void operatorControl(){
 		while(isOperatorControl() && isEnabled()){
 			if(oi.getButton(true, Button.LEFT_BUMPER)) drive.unlock(); else if(oi.getPOV()>-1) drive.lock(oi.getPOV());
-			drive.drive(oi.getX(), oi.getY(), oi.getRotation(), true);
+			drive.drive(oi.getX(), oi.getY(), oi.getRotation(), false);
+			conveyor.set(oi.getConveyorSpeed());
+			SmartDashboard.putString("Conveyor", oi.getConveyorSpeed() + "-" + conveyor.get());
+			SmartDashboard.putNumber("Controller X", oi.getX());
+			SmartDashboard.putNumber("Controller Y", oi.getY());
+			SmartDashboard.putNumber("Controller Rotation", oi.getRotation());
 			Timer.delay(0.005);
 		}
-	}
+	}/*
 	@Override
-	public void test(){
-		while(isTest() && isEnabled()){
-			drive.stop();
-			Timer.delay(0.005);
+	public void autonomous(){
+		while(isAutonomous() && isEnabled()){
+			drive.unlock();
+//			Button[] buttons = new Button[]{Button.Y, Button.X, Button.B, Button.A};
+//			for(int i=0;i<buttons.length;i++) drive.getMotor(i).set(oi.getButton(true, buttons[i]) ? -0.2 : 0);
+//			Timer.delay(0.005);
+			pneumatics.loop();
 		}
-	}
+	}*/
 	@Override
 	public void run(){
 		while(true){
@@ -95,9 +103,10 @@ public class Robot extends SampleRobot implements Runnable{
 		}
 	}
 	private void move(double inches) throws InterruptedException{
-		double start = drive.getDistance(-1);
+		SmartDashboard.putString("Phase", "Move " + inches);
+		double start = drive.getDistance(1);
 		double diff;
-		while(Math.abs(diff = inches - (drive.getDistance(-1) - start)) > 15){
+		while(Math.abs(diff = inches - (drive.getDistance(1) - start)) > 15){
 			drive.drive(0, Math.copySign(0.3, inches), 0, false);
 			SmartDashboard.putNumber("Diff", diff);
 			if(Thread.interrupted()) throw new InterruptedException();
@@ -105,6 +114,7 @@ public class Robot extends SampleRobot implements Runnable{
 		}
 	}
 	private void turn(int angle) throws InterruptedException{
+		SmartDashboard.putString("Phase", "Turn " + angle);
 		drive.lock(angle - (int)sensors.gyroAngle());
 		while(Math.abs(angle - sensors.gyroAngle()) > 1){
 			drive.drive(0, 0, 0, false);//Let the rotation lock have its way
