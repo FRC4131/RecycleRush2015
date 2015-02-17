@@ -24,4 +24,16 @@ public class OI{
 		public final int button;
 		private Button(int button){this.button = button;}
 	}
+	public double getLeftArmRawAxis(){
+		return Math.abs(other.getRawAxis(1)) > deadband ? other.getRawAxis(1) : 0 ;
+	}
+	public double getRightArmRawAxis(){
+		return Math.abs(other.getRawAxis(4)) > deadband ? other.getRawAxis(4) : 0 ;
+	}
+	public double getLeftWheelsRawAxis() {
+		return Math.abs(other.getRawAxis(1)) > deadband ? other.getRawAxis(1) : 0 ;
+	}
+	public double getRightWheelsRawAxis() {
+		return Math.abs(other.getRawAxis(5)) > deadband ? other.getRawAxis(5) : 0 ;
+	}
 }

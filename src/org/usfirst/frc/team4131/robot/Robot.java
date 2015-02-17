@@ -13,6 +13,7 @@ public class Robot extends SampleRobot implements Runnable{
 	private DriveBase drive = new DriveBase(sensors, new int[]{1, 2, 3, 4}, new int[]{0, 1, 2, 3, 8, 9, 6, 7});//LF, LB, RF, RB
 	private Conveyor conveyor = new Conveyor(0, 1);
 	private Pneumatics pneumatics = new Pneumatics(6);
+	private Arms arms = new Arms(2, 3, 4, 5);
 	public Robot(){new Thread(this).start();}
 	
 	/*public void autonomous(){
@@ -61,6 +62,8 @@ public class Robot extends SampleRobot implements Runnable{
 			if(oi.getButton(true, Button.LEFT_BUMPER)) drive.unlock(); else if(oi.getPOV()>-1) drive.lock(oi.getPOV());
 			drive.drive(oi.getX(), oi.getY(), oi.getRotation(), false);
 			conveyor.set(oi.getConveyorSpeed());
+			arms.squeeze(oi.getLeftArmRawAxis(), oi.getRightArmRawAxis());
+			arms.rollIn(oi.getLeftWheelsRawAxis(), oi.getRightWheelsRawAxis());
 			SmartDashboard.putString("Conveyor", oi.getConveyorSpeed() + "-" + conveyor.get());
 			SmartDashboard.putNumber("Controller X", oi.getX());
 			SmartDashboard.putNumber("Controller Y", oi.getY());
