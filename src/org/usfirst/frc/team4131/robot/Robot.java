@@ -14,7 +14,6 @@ public class Robot extends SampleRobot implements Runnable{
 	private Conveyor conveyor = new Conveyor(0, 1);
 	private Pneumatics pneumatics = new Pneumatics(6);
 	public Robot(){new Thread(this).start();}
-	
 	/*public void autonomous(){
 		Thread thread = new Thread(){public void run(){try{
 			drive.unlock();
@@ -59,7 +58,7 @@ public class Robot extends SampleRobot implements Runnable{
 	public void operatorControl(){
 		while(isOperatorControl() && isEnabled()){
 			if(oi.getButton(true, Button.LEFT_BUMPER)) drive.unlock(); else if(oi.getPOV()>-1) drive.lock(oi.getPOV());
-			drive.drive(oi.getX(), oi.getY(), oi.getRotation(), false);
+			drive.drive(oi.getX(), oi.getY(), oi.getRotation(), true);
 			conveyor.set(oi.getConveyorSpeed());
 			SmartDashboard.putString("Conveyor", oi.getConveyorSpeed() + "-" + conveyor.get());
 			SmartDashboard.putNumber("Controller X", oi.getX());
