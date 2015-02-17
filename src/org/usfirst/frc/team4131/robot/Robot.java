@@ -12,10 +12,10 @@ public class Robot extends SampleRobot implements Runnable{
 	private Sensors sensors = new Sensors(0, 0, 1, 2);
 	private DriveBase drive = new DriveBase(sensors, new int[]{1, 2, 3, 4}, new int[]{0, 1, 2, 3, 8, 9, 6, 7});//LF, LB, RF, RB
 	private Conveyor conveyor = new Conveyor(0, 1);
-//	private Pneumatics pneumatics = new Pneumatics(6);
+	private Pneumatics pneumatics = new Pneumatics(6);
 	public Robot(){new Thread(this).start();}
-	@Override
-	public void autonomous(){
+	
+	/*public void autonomous(){
 		Thread thread = new Thread(){public void run(){try{
 			drive.unlock();
 			switch(DriverStation.getInstance().getLocation()){
@@ -54,7 +54,7 @@ public class Robot extends SampleRobot implements Runnable{
 		while(isEnabled() && isAutonomous()) Timer.delay(0.005);
 		if(thread.isAlive()) thread.interrupt();
 		drive.stop();
-	}
+	}*/
 	@Override
 	public void operatorControl(){
 		while(isOperatorControl() && isEnabled()){
@@ -67,17 +67,17 @@ public class Robot extends SampleRobot implements Runnable{
 			SmartDashboard.putNumber("Controller Rotation", oi.getRotation());
 			Timer.delay(0.005);
 		}
-	}/*
+	}
 	@Override
 	public void autonomous(){
 		while(isAutonomous() && isEnabled()){
 			drive.unlock();
-//			Button[] buttons = new Button[]{Button.Y, Button.X, Button.B, Button.A};
-//			for(int i=0;i<buttons.length;i++) drive.getMotor(i).set(oi.getButton(true, buttons[i]) ? -0.2 : 0);
-//			Timer.delay(0.005);
+			Button[] buttons = new Button[]{Button.Y, Button.X, Button.B, Button.A};
+			for(int i=0;i<buttons.length;i++) drive.getMotor(i).set(oi.getButton(true, buttons[i]) ? -0.2 : 0);
+			Timer.delay(0.005);
 			pneumatics.loop();
 		}
-	}*/
+	}
 	@Override
 	public void run(){
 		while(true){

@@ -11,7 +11,7 @@ public class Pneumatics{
 	public Pneumatics(int comp){
 		this.comp = new Compressor(comp);
 		this.comp.setClosedLoopControl(true);
-		for(int i=0;i<solenoids.length;i++) solenoids[i] = new Solenoid(i);
+		for(int i=0;i<solenoids.length;i++) solenoids[i] = new Solenoid(comp, i);
 	}
 	public void loop(){
 		for(int i=0;i<solenoids.length;i++){
