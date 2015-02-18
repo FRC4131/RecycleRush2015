@@ -4,14 +4,17 @@ import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotDrive;
 
+/**
+ * A representation of the drivetrain for the robot.
+ * There are four motors with Mecanum wheels, and a quadrature encoder on each wheel.
+ * This also contains all of the drive-related automation functions (ie point-here), because otherwise it would be a very empty class.
+ */
 public class DriveBase{
-	private static final double ramp = 0.60;//Amount to ramp up or down by in each tick
 	private Sensors sensors;
 	private CANTalon[] talons = new CANTalon[4];
 	private Encoder[] encoders = new Encoder[4];
 	private RobotDrive drive;
 	private int lockDir = -1;//0-360; keep the robot in this orientation. -1 is unlocked.
-	private double x, y, rot;//Used for ramping
 	public DriveBase(Sensors sensors, int[] motors, int[] encoders){
 		this.sensors = sensors;
 		for(int i=0;i<motors.length;i++){
@@ -28,9 +31,7 @@ public class DriveBase{
 		x = Math.min(Math.max(x, -1), 1);
 		y = Math.min(Math.max(y, -1), 1);
 		rot = Math.min(Math.max(rot, -1), 1);
-		drive.mecanumDrive_Cartesian(this.x + ramp*(x-this.x), this.y + ramp*(y-this.y), this.rot + ramp*(rot-this.rot),
-				driverOriented ? sensors.gyroAngle() : 0);
-		this.x = x; this.y = y; this.rot = rot;
+		drive.mecanumDrive_Cartesian(x, -y, rot, driverOriented ? sensors.gyroAngle() : 0);
 	}
 	public void stop(){
 		for(CANTalon talon : talons) talon.set(0);

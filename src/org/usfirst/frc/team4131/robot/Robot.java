@@ -1,7 +1,5 @@
 package org.usfirst.frc.team4131.robot;
 
-import org.usfirst.frc.team4131.robot.OI.Button;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -12,69 +10,52 @@ public class Robot extends SampleRobot implements Runnable{
 	private Sensors sensors = new Sensors(0, 0, 1, 2);
 	private DriveBase drive = new DriveBase(sensors, new int[]{1, 2, 3, 4}, new int[]{0, 1, 2, 3, 8, 9, 6, 7});//LF, LB, RF, RB
 	private Conveyor conveyor = new Conveyor(0, 1);
-	private Pneumatics pneumatics = new Pneumatics(6);
+//	private Arms arms = new Arms(2, 3, 4, 5);
+//	private Claw claw = new Claw(6, 2, 5, 3, 4, 3, 2, 3, 4, 5);
+	private Elevator elevator = new Elevator(6, 2, 5, 0);
 	public Robot(){new Thread(this).start();}
-	/*public void autonomous(){
+	@Override
+	public void autonomous(){
 		Thread thread = new Thread(){public void run(){try{
-			drive.unlock();
-			switch(DriverStation.getInstance().getLocation()){
-				case(1):
-					//Left side of the field
-					break;
-				case(2):
-					//Middle of the field
-					break;
-				case(3):
-					//Right side of the field
-					break;
-			}
-			move(75);
-			turn(-90);
-			move(49);
-			turn(90);
-			move(53);
-			turn(-58);
-			move(62);
-			turn(-72);
-			move(51);
-			turn(50);
-			move(43);
-			turn(-90);
-			move(42);
-			turn(-85);
-			move(61);
+//			claw.elevate(-1.0);//Full speed down
+//			claw.setOpen(Boolean.FALSE);
+//			claw.elevate(1.0);
+//			arms.squeeze(1, 1);
+			turn(180);
+			
 			drive.stop();
-		}catch(InterruptedException ex){}catch(Throwable ex){
-			String string = ex.getMessage() + "\r\n";
-			for(StackTraceElement element : ex.getStackTrace()) string = string.concat(element.toString());
-			DriverStation.reportError(string, false);
-		}}};
+		}catch(InterruptedException ex){}}};
 		thread.start();
 		while(isEnabled() && isAutonomous()) Timer.delay(0.005);
 		if(thread.isAlive()) thread.interrupt();
 		drive.stop();
-	}*/
+	}
 	@Override
 	public void operatorControl(){
 		while(isOperatorControl() && isEnabled()){
-			if(oi.getButton(true, Button.LEFT_BUMPER)) drive.unlock(); else if(oi.getPOV()>-1) drive.lock(oi.getPOV());
+			if(oi.unlockDrive()) drive.unlock(); else if(oi.getPOV()>-1) drive.lock(oi.getPOV());
 			drive.drive(oi.getX(), oi.getY(), oi.getRotation(), true);
 			conveyor.set(oi.getConveyorSpeed());
-			SmartDashboard.putString("Conveyor", oi.getConveyorSpeed() + "-" + conveyor.get());
-			SmartDashboard.putNumber("Controller X", oi.getX());
-			SmartDashboard.putNumber("Controller Y", oi.getY());
-			SmartDashboard.putNumber("Controller Rotation", oi.getRotation());
+//			arms.squeeze(oi.leftArm(), oi.rightArm());
+//			arms.rollIn(oi.leftArmWheels(), oi.rightArmWheels());
+//			claw.setOpen(oi.getClaw());
+//			claw.elevate(oi.getClawElevation());
+//			claw.rotate(oi.getClawRotation());
+			if(oi.liftElevator()) elevator.lift();
+			else if(oi.dropElevator()) elevator.drop();
+			else elevator.stop();
+			if(oi.engageClamp()) elevator.engage();
+			else if(oi.disengageClamp()) elevator.disengage();
 			Timer.delay(0.005);
 		}
 	}
 	@Override
-	public void autonomous(){
-		while(isAutonomous() && isEnabled()){
+	public void test(){
+		while(isTest() && isEnabled()){
 			drive.unlock();
-			Button[] buttons = new Button[]{Button.Y, Button.X, Button.B, Button.A};
+			int[] buttons = new int[]{OI.Y, OI.X, OI.B, OI.A};
 			for(int i=0;i<buttons.length;i++) drive.getMotor(i).set(oi.getButton(true, buttons[i]) ? -0.2 : 0);
 			Timer.delay(0.005);
-			pneumatics.loop();
 		}
 	}
 	@Override
@@ -94,7 +75,7 @@ public class Robot extends SampleRobot implements Runnable{
 				SmartDashboard.putNumber("Current " + i, drive.getMotor(i).getOutputCurrent());
 			}
 			SmartDashboard.putNumber("Battery", DriverStation.getInstance().getBatteryVoltage());
-			if(oi.getButton(true, Button.B)){
+			if(oi.resetSensors()){
 				sensors.reset();
 				drive.reset();
 			}
@@ -121,5 +102,16 @@ public class Robot extends SampleRobot implements Runnable{
 			Timer.delay(0.005);
 		}
 		drive.unlock();
-	} 
+	}
+	private void strafe(double inches) throws InterruptedException{
+		SmartDashboard.putString("Phase", "Strafe " + inches);
+		double start = drive.getDistance(0);
+		double diff;
+		while(Math.abs(diff = inches - (drive.getDistance(0) - start)) > 15){
+			drive.drive(Math.copySign(0.3, inches), 0, 0, false);
+			SmartDashboard.putNumber("Diff", diff);
+			if(Thread.interrupted()) throw new InterruptedException();
+			Timer.delay(0.005);
+		}
+	}
 }
