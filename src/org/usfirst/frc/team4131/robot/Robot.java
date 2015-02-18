@@ -10,9 +10,9 @@ public class Robot extends SampleRobot implements Runnable{
 	private Sensors sensors = new Sensors(0, 0, 1, 2);
 	private DriveBase drive = new DriveBase(sensors, new int[]{1, 2, 3, 4}, new int[]{0, 1, 2, 3, 8, 9, 6, 7});//LF, LB, RF, RB
 	private Conveyor conveyor = new Conveyor(0, 1);
-//	private Arms arms = new Arms(2, 3, 4, 5);
+//	private Arms arms = new Arms(1, 2, 4, 5);
 //	private Claw claw = new Claw(6, 2, 5, 3, 4, 3, 2, 3, 4, 5);
-	private Elevator elevator = new Elevator(6, 2, 5, 0);
+	private Elevator elevator = new Elevator(6, 2, 5, 0, 4, 5);
 	public Robot(){new Thread(this).start();}
 	@Override
 	public void autonomous(){
@@ -22,7 +22,6 @@ public class Robot extends SampleRobot implements Runnable{
 //			claw.elevate(1.0);
 //			arms.squeeze(1, 1);
 			turn(180);
-			
 			drive.stop();
 		}catch(InterruptedException ex){}}};
 		thread.start();
@@ -32,6 +31,8 @@ public class Robot extends SampleRobot implements Runnable{
 	}
 	@Override
 	public void operatorControl(){
+		elevator.engage();
+		//claw.setOpen(Boolean.FALSE);
 		while(isOperatorControl() && isEnabled()){
 			if(oi.unlockDrive()) drive.unlock(); else if(oi.getPOV()>-1) drive.lock(oi.getPOV());
 			drive.drive(oi.getX(), oi.getY(), oi.getRotation(), true);
@@ -46,6 +47,15 @@ public class Robot extends SampleRobot implements Runnable{
 			else elevator.stop();
 			if(oi.engageClamp()) elevator.engage();
 			else if(oi.disengageClamp()) elevator.disengage();
+			/*if(elevator.getSwitch1()){
+				conveyor.set(0);
+				elevator.lift();
+			}
+			if(elevator.getSwitch2()){
+				elevator.engage();
+				elevator.drop();
+			}
+			if(oi.disengageClamp()) elevator.disengage();*/
 			Timer.delay(0.005);
 		}
 	}
@@ -75,6 +85,8 @@ public class Robot extends SampleRobot implements Runnable{
 				SmartDashboard.putNumber("Current " + i, drive.getMotor(i).getOutputCurrent());
 			}
 			SmartDashboard.putNumber("Battery", DriverStation.getInstance().getBatteryVoltage());
+			SmartDashboard.putBoolean("Switch 1", elevator.getSwitch1());
+			SmartDashboard.putBoolean("Switch 2", elevator.getSwitch2());
 			if(oi.resetSensors()){
 				sensors.reset();
 				drive.reset();
