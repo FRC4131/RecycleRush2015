@@ -21,7 +21,7 @@ public class OI{
 	public double getRotation(){return removeDeadband(drive.getRawAxis(RIGHT_X));}
 	public boolean getButton(boolean controller, int button){return (controller ? drive : other).getRawButton(button);}
 	public double getConveyorSpeed(){
-		return other.getRawButton(RIGHT_BUMPER) ? 0 : removeDeadband(other.getRawAxis(LEFT_TRIGGER) - other.getRawAxis(RIGHT_TRIGGER));
+		return other.getRawButton(RIGHT_BUMPER) ? 0 : removeDeadband(other.getRawAxis(RIGHT_TRIGGER) - other.getRawAxis(LEFT_TRIGGER));
 	}
 	public double leftArm(){return removeDeadband(other.getRawAxis(LEFT_X));}
 	public double rightArm(){return removeDeadband(other.getRawAxis(RIGHT_X));}
@@ -40,7 +40,7 @@ public class OI{
 	public boolean dropElevator(){return !other.getRawButton(RIGHT_BUMPER) && other.getRawButton(A);}
 	public boolean engageClamp(){return !other.getRawButton(RIGHT_BUMPER) && other.getRawButton(X);}
 	public boolean disengageClamp(){return !other.getRawButton(RIGHT_BUMPER) && other.getRawButton(B);}
-	public boolean unlockDrive(){return other.getRawButton(LEFT_BUMPER);}
-	public boolean resetSensors(){return other.getRawButton(B);}
+	public boolean unlockDrive(){return drive.getRawButton(LEFT_BUMPER);}
+	public boolean resetSensors(){return drive.getRawButton(B);}
 	private double removeDeadband(double raw){return (Math.abs(raw)) > deadband ? raw : 0;}
 }

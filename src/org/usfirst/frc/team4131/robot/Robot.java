@@ -10,44 +10,50 @@ public class Robot extends SampleRobot implements Runnable{
 	private Sensors sensors = new Sensors(0, 0, 1, 2);
 	private DriveBase drive = new DriveBase(sensors, new int[]{1, 2, 3, 4}, new int[]{0, 1, 2, 3, 8, 9, 6, 7});//LF, LB, RF, RB
 	private Conveyor conveyor = new Conveyor(0, 1);
-//	private Arms arms = new Arms(1, 2, 4, 5);
+	private Arms arms = new Arms(1, 2, 2, 3);
 //	private Claw claw = new Claw(6, 2, 5, 3, 4, 3, 2, 3, 4, 5);
 	private Elevator elevator = new Elevator(6, 2, 5, 0, 4, 5);
 	public Robot(){new Thread(this).start();}
 	@Override
 	public void autonomous(){
 		Thread thread = new Thread(){public void run(){try{
-//			claw.elevate(-1.0);//Full speed down
-//			claw.setOpen(Boolean.FALSE);
-//			claw.elevate(1.0);
-//			arms.squeeze(1, 1);
-			turn(180);
+			drive.unlock();
+//			strafe(42);
+//			strafe(-42);
+			turn(90);
 			drive.stop();
 		}catch(InterruptedException ex){}}};
 		thread.start();
 		while(isEnabled() && isAutonomous()) Timer.delay(0.005);
-		if(thread.isAlive()) thread.interrupt();
+		thread.interrupt();
+//		thread.stop();
 		drive.stop();
 	}
 	@Override
 	public void operatorControl(){
-		elevator.engage();
-		//claw.setOpen(Boolean.FALSE);
+//		elevator.engage();
+		/*---------------NOT CURRENTLY ATTACHED---------------*\
+		claw.setOpen(Boolean.FALSE);
+		\*----------------------------------------------------*/
+		drive.unlock();
 		while(isOperatorControl() && isEnabled()){
 			if(oi.unlockDrive()) drive.unlock(); else if(oi.getPOV()>-1) drive.lock(oi.getPOV());
 			drive.drive(oi.getX(), oi.getY(), oi.getRotation(), true);
 			conveyor.set(oi.getConveyorSpeed());
-//			arms.squeeze(oi.leftArm(), oi.rightArm());
-//			arms.rollIn(oi.leftArmWheels(), oi.rightArmWheels());
-//			claw.setOpen(oi.getClaw());
-//			claw.elevate(oi.getClawElevation());
-//			claw.rotate(oi.getClawRotation());
-			if(oi.liftElevator()) elevator.lift();
-			else if(oi.dropElevator()) elevator.drop();
-			else elevator.stop();
-			if(oi.engageClamp()) elevator.engage();
-			else if(oi.disengageClamp()) elevator.disengage();
-			/*if(elevator.getSwitch1()){
+			arms.squeeze(oi.leftArm(), oi.rightArm());
+			arms.rollIn(oi.leftArmWheels(), oi.rightArmWheels());
+			/*---------------NOT CURRENTLY ATTACHED---------------*\
+			claw.setOpen(oi.getClaw());
+			claw.elevate(oi.getClawElevation());
+			claw.rotate(oi.getClawRotation());
+			\*----------------------------------------------------*/
+//			if(oi.liftElevator()) elevator.lift();
+//			else if(oi.dropElevator()) elevator.drop();
+//			else elevator.stop();
+//			if(oi.engageClamp()) elevator.engage();
+//			else if(oi.disengageClamp()) elevator.disengage();
+			/*---------------NOT CURRENTLY ATTACHED---------------*\
+			if(elevator.getSwitch1()){
 				conveyor.set(0);
 				elevator.lift();
 			}
@@ -55,7 +61,8 @@ public class Robot extends SampleRobot implements Runnable{
 				elevator.engage();
 				elevator.drop();
 			}
-			if(oi.disengageClamp()) elevator.disengage();*/
+			if(oi.disengageClamp()) elevator.disengage();
+			\*----------------------------------------------------*/
 			Timer.delay(0.005);
 		}
 	}
@@ -87,10 +94,15 @@ public class Robot extends SampleRobot implements Runnable{
 			SmartDashboard.putNumber("Battery", DriverStation.getInstance().getBatteryVoltage());
 			SmartDashboard.putBoolean("Switch 1", elevator.getSwitch1());
 			SmartDashboard.putBoolean("Switch 2", elevator.getSwitch2());
+			SmartDashboard.putNumber("OI-X", oi.getX());
+			SmartDashboard.putNumber("OI-Y", oi.getY());
+			SmartDashboard.putNumber("OI-R", oi.getRotation());
+			SmartDashboard.putNumber("Lock", drive.getLock());
 			if(oi.resetSensors()){
 				sensors.reset();
 				drive.reset();
 			}
+			if(oi.unlockDrive()) drive.unlock();
 			Timer.delay(0.005);
 		}
 	}
@@ -117,9 +129,13 @@ public class Robot extends SampleRobot implements Runnable{
 	}
 	private void strafe(double inches) throws InterruptedException{
 		SmartDashboard.putString("Phase", "Strafe " + inches);
-		double start = drive.getDistance(0);
+		inches *= 1.25;//Account for slip
+		drive.lock((int)sensors.gyroAngle());//Because our center of gravity is behind the center of our bot's volume, the back wheels
+		//Do more of the work than the front. While strafing, because the front wheels are against the back, the robot will turn, because
+		//the back wheels have more influence over the robot's direction. By locking the direction, it counteracts this turn.
+		double start = drive.getDistance(3);
 		double diff;
-		while(Math.abs(diff = inches - (drive.getDistance(0) - start)) > 15){
+		while(Math.abs(diff = inches - (drive.getDistance(3) - start)) > 1){
 			drive.drive(Math.copySign(0.3, inches), 0, 0, false);
 			SmartDashboard.putNumber("Diff", diff);
 			if(Thread.interrupted()) throw new InterruptedException();

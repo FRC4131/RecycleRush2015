@@ -12,10 +12,10 @@ public class Conveyor{
 	}
 	public void set(double value){
 		this.value = value;
-		if(value < 0){
+		if(value > 0){
 			conveyor.set(Value.kReverse);
 			wheels.set(Value.kReverse);
-		}else if(value > 0){
+		}else if(value < 0){
 			conveyor.set(Value.kForward);
 			wheels.set(Value.kForward);
 		}else{

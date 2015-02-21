@@ -26,12 +26,11 @@ public class DriveBase{
 		drive = new RobotDrive(talons[0], talons[1], talons[2], talons[3]);
 	}
 	public void drive(double x, double y, double rot, boolean driverOriented){
-		x=-x; rot=-rot;
-		if(lockDir > -1) rot = (lockDir - constrain(sensors.gyroAngle())) / 90;
-		x = Math.min(Math.max(x, -1), 1);
-		y = Math.min(Math.max(y, -1), 1);
-		rot = Math.min(Math.max(rot, -1), 1);
-		drive.mecanumDrive_Cartesian(x, -y, rot, driverOriented ? sensors.gyroAngle() : 0);
+		if(lockDir > -1){
+			double diff = diff(lockDir, sensors.gyroAngle());
+			rot = 0.7 * diff / 90;
+		}
+		drive.mecanumDrive_Cartesian(-constrain(x, -1, 1), -constrain(y, -1, 1), -constrain(rot, -1, 1), driverOriented ? sensors.gyroAngle() : 0);
 	}
 	public void stop(){
 		for(CANTalon talon : talons) talon.set(0);
@@ -50,5 +49,33 @@ public class DriveBase{
 	}
 	public double getRate(int index){return encoders[index].getRate() * (index<2 ? -1 : 1);}
 	public void reset(){for(Encoder encoder : encoders) encoder.reset();}
-	private double constrain(double raw){return raw - 360*Math.floor(raw/360);}//Constrain to [0, 360)
+	private double diff(double target, double current){
+		double diff = wrap(target, -180, 180) - wrap(current, -180, 180);
+		if(Math.abs(diff) > 180) diff = Math.copySign(Math.abs(diff) - 360, -diff);
+		return diff;
+	}
+	/**
+	 * Wrap the value between the minimum and maximum.
+	 * This is similar to a modulus action, except the minimum and maximum values can be given.
+	 * @param value The value to wrap
+	 * @param min The minimum value the number can be, inclusive
+	 * @param max The maximum value the number can be, exclusive
+	 * @return The wrapped value
+	 */
+	private static double wrap(double value, double min, double max){
+		double range = max - min;
+		while(value < min) value += range;
+		while(value >= max) value -= range;
+		return value;
+	}
+	/**
+	 * Constrain the value to the maximum and minimum values provided.
+	 * If the value is outside of the provided range, it will be assigned to the nearer limit, ie values below minimum become the minimum
+	 * and values above the maximum become the maximum.
+	 * @param value The value to constrain
+	 * @param min The minimum value, inclusive
+	 * @param max The maximum value, inclusive
+	 * @return The constrained value
+	 */
+	private static double constrain(double value, double min, double max){return Math.max(Math.min(value, max), min);}
 }

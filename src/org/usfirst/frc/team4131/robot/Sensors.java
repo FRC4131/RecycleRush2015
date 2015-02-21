@@ -42,6 +42,5 @@ public class Sensors{
 	public double tempF(){return 1.8 * tempC() + 32;}
 	public void reset(){
 		gyro.reset();
-		
 	}
 }
