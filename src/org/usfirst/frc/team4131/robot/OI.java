@@ -10,15 +10,16 @@ public class OI{
 	public static final int A=1, B=2, X=3, Y=4, LEFT_BUMPER=5, RIGHT_BUMPER=6, SCREEN_SELECT=7, MENU=8, LEFT_STICK=9, RIGHT_STICK=10;
 	public static final int LEFT_X=0, LEFT_Y=1, LEFT_TRIGGER=2, RIGHT_TRIGGER=3, RIGHT_X=4, RIGHT_Y=5;
 	private static final double deadband = 0.09;
+	private boolean toggleLock = false, toggleDriverOrientation = false;//Whether the button is pressed
 	private Joystick drive, other;
 	public OI(int drive, int other){
 		this.drive = new Joystick(drive);
 		this.other = new Joystick(other);
 	}
-	public double getX(){return removeDeadband(drive.getRawAxis(LEFT_X));}
-	public double getY(){return removeDeadband(drive.getRawAxis(LEFT_Y));}
+	public double getX(){return removeDeadband(drive.getRawAxis(RIGHT_X));}
+	public double getY(){return -removeDeadband(drive.getRawAxis(RIGHT_Y));}
 	public int getPOV(){return drive.getPOV();}
-	public double getRotation(){return removeDeadband(drive.getRawAxis(RIGHT_X));}
+	public double getRotation(){return removeDeadband(drive.getRawAxis(LEFT_X));}
 	public boolean getButton(boolean controller, int button){return (controller ? drive : other).getRawButton(button);}
 	public double getConveyorSpeed(){
 		return other.getRawButton(RIGHT_BUMPER) ? 0 : removeDeadband(other.getRawAxis(RIGHT_TRIGGER) - other.getRawAxis(LEFT_TRIGGER));
@@ -40,7 +41,18 @@ public class OI{
 	public boolean dropElevator(){return !other.getRawButton(RIGHT_BUMPER) && other.getRawButton(A);}
 	public boolean engageClamp(){return !other.getRawButton(RIGHT_BUMPER) && other.getRawButton(X);}
 	public boolean disengageClamp(){return !other.getRawButton(RIGHT_BUMPER) && other.getRawButton(B);}
-	public boolean unlockDrive(){return drive.getRawButton(LEFT_BUMPER);}
+	public boolean toggleLock(){
+		boolean pressed = drive.getRawButton(LEFT_BUMPER);
+		boolean retVal = pressed && !toggleLock;
+		toggleLock = pressed;
+		return retVal;
+	}
+	public boolean toggleDriverOrientation(){
+		boolean pressed = drive.getRawButton(SCREEN_SELECT);
+		boolean retVal = pressed && !toggleDriverOrientation;
+		toggleDriverOrientation = pressed;
+		return retVal;
+	}
 	public boolean resetSensors(){return drive.getRawButton(B);}
 	private double removeDeadband(double raw){return (Math.abs(raw)) > deadband ? raw : 0;}
 }
