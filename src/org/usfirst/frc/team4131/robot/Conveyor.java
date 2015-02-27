@@ -1,27 +1,14 @@
 package org.usfirst.frc.team4131.robot;
 
-import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.Relay.Value;
+import edu.wpi.first.wpilibj.Talon;
 
 public class Conveyor{
-	private Relay conveyor, wheels;
-	private double value = 0;
-	public Conveyor(int conveyor, int wheels){
-		this.conveyor = new Relay(conveyor);
-		this.wheels = new Relay(wheels);
+	private Talon motor;
+	public Conveyor(int motor){
+		this.motor = new Talon(motor);
 	}
 	public void set(double value){
-		this.value = value;
-		if(value > 0){
-			conveyor.set(Value.kReverse);
-			wheels.set(Value.kReverse);
-		}else if(value < 0){
-			conveyor.set(Value.kForward);
-			wheels.set(Value.kForward);
-		}else{
-			conveyor.set(Value.kOff);
-			wheels.set(Value.kOff);
-		}
+		motor.set(value);
 	}
-	public double get(){return value;}
+	public double get(){return motor.get();}
 }

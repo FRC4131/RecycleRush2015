@@ -3,6 +3,7 @@ package org.usfirst.frc.team4131.robot;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -15,7 +16,6 @@ public class DriveBase{
 	private CANTalon[] talons = new CANTalon[4];
 	private Encoder[] encoders = new Encoder[4];
 	private RobotDrive drive;
-	private boolean driverOriented = true;
 	private int lock = -1;//[0, 360); keep the robot in this orientation. -1 is unlocked.
 	public DriveBase(Sensors sensors, int[] motors, int[] encoders){
 		this.sensors = sensors;
@@ -62,6 +62,49 @@ public class DriveBase{
 		if(Math.abs(diff) > 180) diff = Math.copySign(Math.abs(diff) - 360, -diff);
 		return diff;
 	}
+	
+	public void move(double inches) throws InterruptedException{
+		SmartDashboard.putString("Phase", "Move " + inches);
+		double start = getDistance(0);
+		double diff;
+		while(Math.abs(diff = inches - (getDistance(0) - start)) > 15){
+			drive(0, Math.copySign(0.3, inches), 0, false);
+			SmartDashboard.putNumber("Diff", diff);
+			if(Thread.interrupted()) throw new InterruptedException();
+			Timer.delay(0.005);
+		}
+	}
+	public void turnBy(double angle) throws InterruptedException{
+		turnTo(angle + sensors.gyroAngle());
+	}
+	public void turnTo(double angle) throws InterruptedException{
+		SmartDashboard.putString("Phase", "Turn to " + angle);
+		lock(angle);
+		while(Math.abs(angle - sensors.gyroAngle()) > 1){
+			drive(0, 0, 0, false);//Let the rotation lock have its way
+			SmartDashboard.putNumber("Lock?", getLock());
+			if(Thread.interrupted()) throw new InterruptedException();
+			Timer.delay(0.005);
+		}
+		unlock();
+	}
+	public void strafe(double inches) throws InterruptedException{
+		SmartDashboard.putString("Phase", "Strafe " + inches);
+		inches *= 1.25;//Account for slip
+		lock(sensors.gyroAngle());//Because our center of gravity is behind the center of our bot's volume, the back wheels
+		//Do more of the work than the front. While strafing, because the front wheels are against the back, the robot will turn, because
+		//the back wheels have more influence over the robot's direction. By locking the direction, it counteracts this turn.
+		double start = getDistance(3);
+		double diff;
+		while(Math.abs(diff = inches - (getDistance(3) - start)) > 1){
+			drive(Math.copySign(0.3, inches), 0, 0, false);
+			SmartDashboard.putNumber("Diff", diff);
+			if(Thread.interrupted()) throw new InterruptedException();
+			Timer.delay(0.005);
+		}
+		unlock();
+	}
+	
 	/**Wrap the value between the minimum and maximum.
 	 * This is similar to a modulus action, except the minimum and maximum values can be given.
 	 * @param value The value to wrap
