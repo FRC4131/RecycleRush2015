@@ -34,7 +34,6 @@ public class Autonomous{
 		drive.stop();
 	}*/
 	private void runRaw() throws InterruptedException{
-		drive.turnTo(-90);
 		drive.strafe(130);
 	}
 }

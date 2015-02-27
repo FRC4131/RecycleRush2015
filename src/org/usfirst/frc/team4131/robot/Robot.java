@@ -61,12 +61,7 @@ public class Robot extends SampleRobot implements Runnable{
 	}
 	@Override
 	public void test(){
-		while(isTest() && isEnabled()){
-			drive.unlock();
-			int[] buttons = new int[]{OI.Y, OI.X, OI.B, OI.A};
-			for(int i=0;i<buttons.length;i++) drive.getMotor(i).set(oi.getButton(true, buttons[i]) ? -0.2 : 0);
-			Timer.delay(0.005);
-		}
+		drive.stop();
 	}
 	@Override
 	public void run(){
