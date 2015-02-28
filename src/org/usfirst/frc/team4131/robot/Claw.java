@@ -31,9 +31,8 @@ public class Claw{
 		POT_OFFSET = this.pot.getOffset() * Math.exp(-9);
 		encoder = new Encoder(enc1, enc2);
 	}
-	public void setOpen(Boolean open){
-		if(open!=null) claw.set(open.booleanValue() ? Value.kForward : Value.kReverse);
-	}
+	public void open(){claw.set(Value.kForward);}
+	public void close(){claw.set(Value.kReverse);}
 	public void rotate(double speed){
 		if (encoder.getDistance()>504 || encoder.getDistance()<=0){
 			wrist.set(0);

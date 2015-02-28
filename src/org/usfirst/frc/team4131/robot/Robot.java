@@ -22,43 +22,40 @@ public class Robot extends SampleRobot implements Runnable{
 	}
 	@Override
 	public void operatorControl(){
-//		elevator.engage();
-		/*---------------NOT CURRENTLY ATTACHED---------------*\
-		claw.setOpen(Boolean.FALSE);
-		\*----------------------------------------------------*/
 		drive.unlock();
+		arms.squeeze(0, 0);
+		arms.rollIn(0, 0);
+		conveyor.set(0);
+		elevator.engageClamp();
+		/*-----NOT CURRENTLY ATTACHED-----*\
+		claw.close();
+		\*--------------------------------*/
 		while(isOperatorControl() && isEnabled()){
 			if(oi.unlock()) drive.unlock();
-			else if(oi.getPOV()>-1) drive.lock(oi.getPOV());
-			drive.drive(oi.getX(), oi.getY(), oi.getRotation(), driverOriented);
-			conveyor.set(oi.getConveyorSpeed());
+			else if(oi.lock()>-1) drive.lock(oi.lock());
+			drive.drive(oi.x(), oi.y(), oi.rotation(), driverOriented);
 			arms.squeeze(oi.leftArm(), oi.rightArm());
 			arms.rollIn(oi.leftArmWheels(), oi.rightArmWheels());
-			/*---------------NOT CURRENTLY ATTACHED---------------*\
-			claw.setOpen(oi.getClaw());
-			claw.elevate(oi.getClawElevation());
-			claw.rotate(oi.getClawRotation());
-			\*----------------------------------------------------*/
-			elevator.setElevator(oi.getElevator());
-			if(oi.engageClamp()) elevator.engage();
-			else if(oi.disengageClamp()) elevator.disengage();
-			/*---------------NOT CURRENTLY ATTACHED---------------*\
-			if(elevator.getSwitch1()){
-				conveyor.set(0);
-				elevator.lift();
+			if(oi.conveyorOverride()){
+				conveyor.set(0.28);
+				elevator.disengageClamp();
+			}else{
+				conveyor.set(oi.conveyorSpeed());
+				if(oi.engageClamp()) elevator.engageClamp();
+				else if(oi.disengageClamp()) elevator.disengageClamp();
 			}
-			if(elevator.getSwitch2()){
-				elevator.engage();
-				elevator.drop();
-			}
-			if(oi.disengageClamp()) elevator.disengage();
-			\*----------------------------------------------------*/
+			elevator.setElevator(oi.elevator());
+			/*-----NOT CURRENTLY ATTACHED-----*\
+			if(oi.clawOpen()) claw.open(); else if(oi.clawClose()) claw.close();
+			claw.elevate(oi.clawElevation());
+			claw.rotate(oi.clawRotation());
+			\*--------------------------------*/
 			Timer.delay(0.005);
 		}
 	}
 	@Override
 	public void test(){
-		drive.stop();
+		drive.stop();//Let the compressor charge
 	}
 	@Override
 	public void run(){
@@ -78,18 +75,19 @@ public class Robot extends SampleRobot implements Runnable{
 			}
 			SmartDashboard.putNumber("Battery", DriverStation.getInstance().getBatteryVoltage());
 			SmartDashboard.putNumber("Elevator Pot", elevator.getPot());
-			SmartDashboard.putNumber("OI-X", oi.getX());
-			SmartDashboard.putNumber("OI-Y", oi.getY());
-			SmartDashboard.putNumber("OI-R", oi.getRotation());
+			SmartDashboard.putNumber("OI-X", oi.x());
+			SmartDashboard.putNumber("OI-Y", oi.y());
+			SmartDashboard.putNumber("OI-R", oi.rotation());
 			SmartDashboard.putNumber("Lock", drive.getLock());
 			SmartDashboard.putBoolean("Driver-Oriented", driverOriented);
-			SmartDashboard.putNumber("Conveyor", oi.getConveyorSpeed());
+			SmartDashboard.putNumber("Conveyor", oi.conveyorSpeed());
 			if(oi.resetSensors()){
 				sensors.reset();
 				drive.reset();
 				drive.stop();
 			}
-			if(oi.toggleDriverOrientation()) driverOriented = !driverOriented;
+			if(oi.unlock()) drive.unlock();
+			if(oi.driverOrientation()) driverOriented = !driverOriented;
 			Timer.delay(0.005);
 		}
 	}

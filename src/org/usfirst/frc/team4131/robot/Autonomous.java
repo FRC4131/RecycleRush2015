@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Autonomous{
 	private double start;
-	private final String[] COMMANDS = {"m60"};
+	private final String[] COMMANDS = {"m66"};
 	private Robot robot;
 	private Sensors sensors;
 	private DriveBase drive;
@@ -14,11 +14,12 @@ public class Autonomous{
 		for(String command : COMMANDS){
 			char cmd = command.charAt(0);
 			double val;
-			try{
-				val = Double.valueOf(command.substring(1));
-			}catch(NumberFormatException ex){continue;}
+			try{val = Double.valueOf(command.substring(1));}catch(NumberFormatException ex){continue;}
 			boolean firstTime = true;
-			while(cmd=='m' ? move(firstTime, val) : cmd=='t' ? turnBy(val) : cmd=='T' ? turnTo(val) : cmd=='s' ? strafe(firstTime, val) : false){
+			while(cmd=='m' ? move(firstTime, val) :
+				cmd=='t' ? turnBy(val) :
+				cmd=='T' ? turnTo(val) :
+				cmd=='s' ? strafe(firstTime, val) : false){
 				firstTime = false;
 				if(!robot.isAutonomous() || !robot.isEnabled()) return;
 				Timer.delay(0.005);
@@ -40,25 +41,24 @@ public class Autonomous{
 		drive.move(-61);
 		drive.stop();
 	}*/
-
-	public boolean move(boolean firstTime, double inches){
+	private boolean move(boolean firstTime, double inches){
 		SmartDashboard.putString("Phase", "Move " + inches);
 		if(firstTime) start = drive.getDistance(1);
 		double diff = inches - (drive.getDistance(1) - start);
-		drive.drive(0, Math.copySign(0.4 , inches), 0, false);
+		drive.drive(0, Math.copySign(0.6, inches), 0, false);
 		SmartDashboard.putNumber("Diff", diff);
 		return Math.abs(diff) > 1;
 	}
-	public boolean turnBy(double angle){
+	private boolean turnBy(double angle){
 		return turnTo(angle + sensors.gyroAngle());
 	}
-	public boolean turnTo(double angle){
+	private boolean turnTo(double angle){
 		SmartDashboard.putString("Phase", "Turn to " + angle);
 		drive.lock(angle);
 		drive.drive(0, 0, 0, false);//Let the rotation lock have its way
 		return Math.abs(angle - sensors.gyroAngle()) > 1;
 	}
-	public boolean strafe(boolean firstTime, double inches){
+	private boolean strafe(boolean firstTime, double inches){
 		SmartDashboard.putString("Phase", "Strafe " + inches);
 		drive.lock(sensors.gyroAngle());//Because our center of gravity is behind the center of our bot's volume, the back wheels
 		//Do more of the work than the front. While strafing, because the front wheels are against the back, the robot will turn, because
