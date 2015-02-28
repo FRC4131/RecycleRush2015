@@ -16,10 +16,10 @@ public class OI{
 		this.drive = new Joystick(drive);
 		this.other = new Joystick(other);
 	}
-	public double getX(){return removeDeadband(drive.getRawAxis(RIGHT_X));}
-	public double getY(){return -removeDeadband(drive.getRawAxis(RIGHT_Y));}
+	public double getX(){return removeDeadband(drive.getRawAxis(LEFT_X) * 1.25);}
+	public double getY(){return -removeDeadband(drive.getRawAxis(LEFT_Y));}
 	public int getPOV(){return drive.getPOV();}
-	public double getRotation(){return removeDeadband(drive.getRawAxis(LEFT_X));}
+	public double getRotation(){return removeDeadband(drive.getRawAxis(RIGHT_X));}
 	public boolean getButton(boolean controller, int button){return (controller ? drive : other).getRawButton(button);}
 	public double getConveyorSpeed(){
 		return other.getRawButton(RIGHT_BUMPER) ? 0 : removeDeadband(other.getRawAxis(RIGHT_TRIGGER) - other.getRawAxis(LEFT_TRIGGER));
@@ -37,8 +37,7 @@ public class OI{
 	}
 	public double getClawElevation(){return other.getRawButton(RIGHT_BUMPER) ? other.getRawAxis(LEFT_Y) : 0;}
 	public double getClawRotation(){return other.getRawButton(RIGHT_BUMPER) ? other.getRawAxis(LEFT_X) : 0;}
-	public boolean liftElevator(){return !other.getRawButton(RIGHT_BUMPER) && other.getRawButton(Y);}
-	public boolean dropElevator(){return !other.getRawButton(RIGHT_BUMPER) && other.getRawButton(A);}
+	public double getElevator(){return removeDeadband(drive.getRawAxis(RIGHT_TRIGGER) - drive.getRawAxis(LEFT_TRIGGER));}
 	public boolean engageClamp(){return !other.getRawButton(RIGHT_BUMPER) && other.getRawButton(X);}
 	public boolean disengageClamp(){return !other.getRawButton(RIGHT_BUMPER) && other.getRawButton(B);}
 	public boolean unlock(){return drive.getRawButton(LEFT_BUMPER);}

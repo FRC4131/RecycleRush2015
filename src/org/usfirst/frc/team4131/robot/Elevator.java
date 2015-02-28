@@ -1,34 +1,32 @@
 package org.usfirst.frc.team4131.robot;
 
-import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Victor;
 
 public class Elevator{
 	private DoubleSolenoid clamps;
-	private Relay chains;
-	private DigitalInput switch1, switch2;
-	public Elevator(int pcm, int clamp, int unclamp, int chains, int switch1, int switch2){
+	private Victor chains;
+	private AnalogInput pot;
+	public Elevator(int pcm, int clamp, int unclamp, int chains, int pot){
 		this.clamps = new DoubleSolenoid(pcm, clamp, unclamp);
-		this.chains = new Relay(chains);
-		this.switch1 = new DigitalInput(switch1);
-		this.switch2 = new DigitalInput(switch2);
+		this.chains = new Victor(chains);
+		this.pot = new AnalogInput(pot);
 	}
 	public void engage(){clamps.set(Value.kForward);}
 	public void disengage(){clamps.set(Value.kReverse);}
-	public void lift(){chains.set(Relay.Value.kForward);}
-	public void drop(){chains.set(Relay.Value.kReverse);}
-	public void stop(){chains.set(Relay.Value.kOff);}
-	public boolean getSwitch1(){return !switch1.get();}
-	public boolean getSwitch2(){return !switch2.get();}
+	public void setElevator(double speed){chains.set(speed);}
+	public double getPot(){
+		SmartDashboard.putNumber("Pot Mult", pot.getLSBWeight() * Math.exp(-9));
+		SmartDashboard.putNumber("Pot Offset", pot.getLSBWeight() * Math.exp(-9));
+		return pot.getVoltage();
+	}
 	public Boolean getElevator(){
-		switch(chains.get()){
-			case kForward: return Boolean.TRUE;
-			case kReverse: return Boolean.FALSE;
-			default: return null;
-		}
+		if(chains.get() > 0) return Boolean.TRUE;
+		if(chains.get() < 0) return Boolean.FALSE;
+		return null;
 	}
 	public Boolean getClamps(){
 		switch(clamps.get().value){
