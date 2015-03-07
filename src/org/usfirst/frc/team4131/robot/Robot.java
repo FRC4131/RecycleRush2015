@@ -12,7 +12,7 @@ public class Robot extends SampleRobot implements Runnable{
 	private Arms arms = new Arms(3, 5, 4, 6);
 //	private Claw claw = new Claw(6, 2, 5, 3, 4, 3, 2, 3, 4, 5);
 	private Conveyor conveyor = new Conveyor(0, 1, 2);
-	private Elevator elevator = new Elevator(6, 4, 3, 7, 3);
+	private Elevator elevator = new Elevator(6, 4, 3, 7, 8, 10, 11, 12, 13);
 	private Autonomous autonomous = new Autonomous(this, sensors, drive);
 	private boolean driverOriented = true;
 	public Robot(){new Thread(this).start();}
@@ -74,7 +74,8 @@ public class Robot extends SampleRobot implements Runnable{
 				SmartDashboard.putNumber("Current " + i, drive.getMotor(i).getOutputCurrent());
 			}
 			SmartDashboard.putNumber("Battery", DriverStation.getInstance().getBatteryVoltage());
-			SmartDashboard.putNumber("Elevator Pot", elevator.getPot());
+			SmartDashboard.putNumber("Elevator Left Enc", elevator.getEncL());
+			SmartDashboard.putNumber("Elevator RIght Enc", elevator.getEncR());
 			SmartDashboard.putNumber("OI-X", oi.x());
 			SmartDashboard.putNumber("OI-Y", oi.y());
 			SmartDashboard.putNumber("OI-R", oi.rotation());
