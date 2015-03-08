@@ -34,8 +34,8 @@ public class OI{
 	public boolean conveyorOverride(){return !getButton(OTHER, RIGHT_BUMPER) && getButton(OTHER, MENU);}
 	public double leftArm(){return getAxis(OTHER, LEFT_X);}
 	public double rightArm(){return getAxis(OTHER, RIGHT_X);}
-	public double leftArmWheels(){return removeDeadband(-getAxis(OTHER, LEFT_Y));}
-	public double rightArmWheels(){return removeDeadband(-getAxis(OTHER, RIGHT_Y));}
+	public double leftArmWheels(){return removeDeadband(getAxis(OTHER, LEFT_Y));}
+	public double rightArmWheels(){return removeDeadband(getAxis(OTHER, RIGHT_Y));}
 	public boolean clawOpen(){return getButton(OTHER, RIGHT_BUMPER) && getButton(OTHER, Y);}
 	public boolean clawClose(){return getButton(OTHER, RIGHT_BUMPER) && getButton(OTHER, A);}
 	public double clawElevation(){return getButton(OTHER, RIGHT_BUMPER) ? getAxis(OTHER, LEFT_Y) : 0;}

@@ -81,6 +81,7 @@ public class Robot extends SampleRobot implements Runnable{
 			SmartDashboard.putNumber("Lock", drive.getLock());
 			SmartDashboard.putBoolean("Driver-Oriented", driverOriented);
 			SmartDashboard.putNumber("Conveyor", oi.conveyorSpeed());
+			SmartDashboard.putString("Elevator", oi.elevator() + " - " + elevator.getChains());
 			if(oi.resetSensors()){
 				sensors.reset();
 				drive.reset();

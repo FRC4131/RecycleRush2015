@@ -23,11 +23,7 @@ public class Elevator{
 	public double getPot(){
 		return (pot.getVoltage() * POT_MULT - POT_OFFSET) - 743 * 27/3.5;//Map potentiometer to [0, 27] (the height of the elevator)
 	}
-	public Boolean getElevator(){
-		if(chains.get() > 0) return Boolean.TRUE;
-		if(chains.get() < 0) return Boolean.FALSE;
-		return null;
-	}
+	public double getChains(){return chains.get();}
 	public Boolean getClamps(){
 		switch(clamps.get().value){
 			case(Value.kForward_val): return Boolean.TRUE;
