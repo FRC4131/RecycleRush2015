@@ -1,11 +1,11 @@
 package org.usfirst.frc.team4131.robot;
 
+import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Victor;
 
 public class Conveyor{
-	private Victor left;
-	private Talon right, conveyor;
+	private SpeedController left, right, conveyor;
 	public Conveyor(int left, int right, int conveyor){
 		this.left = new Victor(left);
 		this.right = new Talon(right);

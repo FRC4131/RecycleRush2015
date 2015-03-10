@@ -3,12 +3,13 @@ package org.usfirst.frc.team4131.robot;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Victor;
 
 public class Elevator{
 	private final double POT_MULT, POT_OFFSET;
 	private DoubleSolenoid clamps;
-	private Victor chains;
+	private SpeedController chains;
 	private AnalogInput pot;
 	public Elevator(int pcm, int clamp, int unclamp, int chains, int pot){
 		this.clamps = new DoubleSolenoid(pcm, clamp, unclamp);

@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;
 
 /**
@@ -17,14 +17,13 @@ import edu.wpi.first.wpilibj.Talon;
 public class Claw{
 	private final double POT_MULT, POT_OFFSET;
 	private DoubleSolenoid claw, elbow;
-	private Relay elevator;
-	private Talon wrist;
+	private SpeedController elevator, wrist;
 	private AnalogInput pot;
 	private Encoder encoder;
 	public Claw(int pcm, int clawOpen, int clawClose, int elbowIn, int elbowOut, int elevator, int wrist, int pot, int enc1, int enc2){
 		claw = new DoubleSolenoid(pcm, clawOpen, clawClose);
 		elbow = new DoubleSolenoid(pcm, elbowIn, elbowOut);
-		this.elevator = new Relay(elevator);
+		this.elevator = new Talon(elevator);
 		this.wrist = new Talon(wrist);
 		this.pot = new AnalogInput(pot);
 		POT_MULT = this.pot.getLSBWeight() * Math.exp(-9);
@@ -40,10 +39,9 @@ public class Claw{
 		wrist.set(speed);
 	}
 	public void elevate(double speed){
-		if(getPot() < 1 && speed < 0) return;//Going down from bottom limit is not allowed.
-		if(getPot() > 4 && speed > 0) return;//Neither is going up past the top limit.
-		elevator.set(speed > 0 ? Relay.Value.kForward : speed < 0 ? Relay.Value.kReverse : Relay.Value.kOff);
-		elbow.set(getPot() < 1 ? Value.kForward : Value.kReverse);
+		if((speed < 0 && getElevation() > 1) || (speed > 0 && getElevation() > 60) || speed==0) elevator.set(speed);//Physical limits
+		//TODO find actual height of claw
+		elbow.set(getElevation() < 1 ? Value.kForward : Value.kReverse);
 	}
-	private double getPot(){return pot.getVoltage() * POT_MULT - POT_OFFSET;}//Helper for applying the multiplier and offset values
+	private double getElevation(){return pot.getVoltage() * POT_MULT - POT_OFFSET;}//Helper for applying the multiplier and offset values
 }

@@ -1,13 +1,12 @@
 package org.usfirst.frc.team4131.robot;
 
+import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Victor;
 
 public class Arms{
 //	private final double POT_MULT1, POT_OFFSET1, POT_MULT2, POT_OFFSET2;
-	private Talon arm1, arm2;
-	private Victor wheel1;
-	private Talon wheel2;
+	private SpeedController arm1, arm2, wheel1, wheel2;
 //	private AnalogInput pot1, pot2;
 	public Arms(int arm1, int arm2, int wheel1, int wheel2/*, int pot1, int pot2*/){
 		this.arm1 = new Talon(arm1);
