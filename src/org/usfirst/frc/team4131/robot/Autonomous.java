@@ -24,6 +24,7 @@ public class Autonomous{
 				if(!robot.isAutonomous() || !robot.isEnabled()) return;
 				Timer.delay(0.005);
 			}
+			drive.unlock();
 		}
 	}
 	private boolean move(boolean firstTime, double inches){
