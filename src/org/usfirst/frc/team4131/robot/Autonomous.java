@@ -26,21 +26,6 @@ public class Autonomous{
 			}
 		}
 	}
-	/*private void runRaw() throws InterruptedException{
-		drive.unlock();
-		drive.strafe(75);
-		drive.move(49);
-		drive.strafe(44);
-		drive.turnTo(24);//arctan(23/52)
-		drive.move(Math.sqrt(23*23 + 52*52));
-		drive.turnTo(-39);//arctan(-39/48)
-		drive.move(Math.sqrt(39*39 + 48*48));
-		drive.turnTo(0);
-		drive.move(43);
-		drive.strafe(-42);
-		drive.move(-61);
-		drive.stop();
-	}*/
 	private boolean move(boolean firstTime, double inches){
 		SmartDashboard.putString("Phase", "Move " + inches);
 		if(firstTime) start = drive.getDistance(1);
