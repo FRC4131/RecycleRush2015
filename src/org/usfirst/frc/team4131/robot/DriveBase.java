@@ -36,7 +36,7 @@ public class DriveBase{
 		SmartDashboard.putNumber("DR-X", x);
 		SmartDashboard.putNumber("DR-Y", y);
 		SmartDashboard.putNumber("DR-R", rot);
-		drive.mecanumDrive_Cartesian(-constrain(x, -1, 1), constrain(y, -1, 1), -constrain(rot, -1, 1), driverOriented ? sensors.gyroAngle() : 0);
+		drive.mecanumDrive_Cartesian(constrain(x, -1, 1), constrain(-y, -1, 1), constrain(rot, -1, 1), driverOriented ? sensors.gyroAngle() : 0);
 	}
 	public void stop(){
 		for(CANTalon talon : talons) talon.set(0);

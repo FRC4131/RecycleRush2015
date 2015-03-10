@@ -11,11 +11,11 @@ import edu.wpi.first.wpilibj.Joystick;
  */
 public class OI{
 	//Buttons
-	private static final int A=1, B=2, X=3, Y=4, LEFT_BUMPER=5, RIGHT_BUMPER=6, SCREEN_SELECT=7, MENU=8, LEFT_STICK=9, RIGHT_STICK=10;
+	public static final int A=1, B=2, X=3, Y=4, LEFT_BUMPER=5, RIGHT_BUMPER=6, SCREEN_SELECT=7, MENU=8, LEFT_STICK=9, RIGHT_STICK=10;
 	//Axes
-	private static final int LEFT_X=0, LEFT_Y=1, LEFT_TRIGGER=2, RIGHT_TRIGGER=3, RIGHT_X=4, RIGHT_Y=5;
+	public static final int LEFT_X=0, LEFT_Y=1, LEFT_TRIGGER=2, RIGHT_TRIGGER=3, RIGHT_X=4, RIGHT_Y=5;
 	//Controllers
-	private final int DRIVE, OTHER;
+	public final int DRIVE, OTHER;
 	private static final double deadband = 0.09;
 	private Joystick[] joysticks = new Joystick[DriverStation.kJoystickPorts];
 	private boolean driverOrientation = false;//Previous button states, for toggle operations
@@ -24,7 +24,7 @@ public class OI{
 		OTHER = other;
 		for(int i=0;i<joysticks.length;i++) joysticks[i] = new Joystick(i);
 	}
-	public double x(){return getAxis(DRIVE, LEFT_X) * 1.25;}
+	public double x(){return getAxis(DRIVE, LEFT_X);}
 	public double y(){return -getAxis(DRIVE, LEFT_Y);}
 	public double rotation(){return getAxis(DRIVE, RIGHT_X);}
 	public int lock(){return getPOV(DRIVE);}
@@ -52,18 +52,18 @@ public class OI{
 	}
 	public boolean resetSensors(){return getButton(DRIVE, B);}
 	
-	private boolean getButton(int stick, int button){return getButton(stick, button, false);}
-	private boolean getButton(int stick, int button, boolean def){
+	public boolean getButton(int stick, int button){return getButton(stick, button, false);}
+	public boolean getButton(int stick, int button, boolean def){
 		if(!isConnected(stick)) return def;
 		return joysticks[stick].getRawButton(button);
 	}
-	private double getAxis(int stick, int axis){return getAxis(stick, axis, 0);}
-	private double getAxis(int stick, int axis, double def){
+	public double getAxis(int stick, int axis){return getAxis(stick, axis, 0);}
+	public double getAxis(int stick, int axis, double def){
 		if(!isConnected(stick)) return def;
 		return removeDeadband(joysticks[stick].getRawAxis(axis));
 	}
-	private int getPOV(int stick){return getPOV(stick, -1);}
-	private int getPOV(int stick, int def){
+	public int getPOV(int stick){return getPOV(stick, -1);}
+	public int getPOV(int stick, int def){
 		if(!isConnected(stick)) return def;
 		return joysticks[stick].getPOV();
 	}
