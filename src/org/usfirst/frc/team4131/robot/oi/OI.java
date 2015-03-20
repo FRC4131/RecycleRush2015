@@ -2,6 +2,9 @@ package org.usfirst.frc.team4131.robot.oi;
 
 import org.usfirst.frc.team4131.robot.commands.ClampCommand;
 import org.usfirst.frc.team4131.robot.commands.ClawCommand;
+import org.usfirst.frc.team4131.robot.commands.DriverOrientationCommand;
+import org.usfirst.frc.team4131.robot.commands.LockCommand;
+import org.usfirst.frc.team4131.robot.commands.SensorResetCommand;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.Button;
@@ -16,10 +19,9 @@ public class OI{
 	private static final int LEFT_X=0, LEFT_Y=1, LEFT_TRIGGER=2, RIGHT_TRIGGER=3, RIGHT_X=4, RIGHT_Y=5;
 	private Joystick drive = new Joystick(0), aux = new Joystick(1);
 	private Button clawOpen = new JoystickButton(aux, Y), clawClose = new JoystickButton(aux, A),
-			engageClamp = new JoystickButton(aux, X), disengageClamp = new JoystickButton(aux, B)//,
-//			unlock = new JoystickButton(drive, LEFT_BUMPER), driverOriented = new JoystickButton(drive, SCREEN_SELECT),
-//			resetSensors = new JoystickButton(drive, B)
-			;
+			engageClamp = new JoystickButton(aux, X), disengageClamp = new JoystickButton(aux, B), lock = new POV(drive),
+			unlock = new JoystickButton(drive, LEFT_BUMPER), driverOriented = new JoystickButton(drive, SCREEN_SELECT),
+			resetSensors = new JoystickButton(drive, B);
 	//button.whenPressed(Command command): run the command once when pressed
 	//button.whileHeld(Command command): run the command while the button is held and interrupt it when it's released
 	//button.whenReleased(Command command): run the command once when released
@@ -28,6 +30,10 @@ public class OI{
 		clawClose.whenPressed(new ClawCommand(true));
 		engageClamp.whenPressed(new ClampCommand(true));
 		disengageClamp.whenPressed(new ClampCommand(false));
+		lock.whenPressed(new LockCommand(drive.getPOV()));
+		unlock.whenPressed(new LockCommand(-1));
+		driverOriented.whenPressed(new DriverOrientationCommand());
+		resetSensors.whenPressed(new SensorResetCommand());
 	}
 	public double x(){return drive.getRawAxis(LEFT_X)* 1.25;}
 	public double y(){return -drive.getRawAxis(LEFT_Y);}

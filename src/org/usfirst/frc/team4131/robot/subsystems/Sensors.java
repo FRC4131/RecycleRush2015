@@ -12,4 +12,5 @@ public class Sensors extends Subsystem{
 	protected void initDefaultCommand(){}//No commands to run on this thing; just read sensor values.
 	public double gyroAngle(){return gyro.getAngle();}
 	public double gyroRate(){return gyro.getRate();}
+	public void reset(){gyro.reset();}
 }

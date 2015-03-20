@@ -37,7 +37,11 @@ public class DriveBase extends Subsystem{
 	public SpeedController getMotor(int index){return motors[index];}
 	public double getEncoderDistance(int index){return encoders[index].getDistance();}
 	public double getEncoderRate(int index){return encoders[index].getRate();}
-	public void stop(){for(SpeedController motor : motors) motor.set(0);}
+	public void stop(){
+		for(SpeedController motor : motors) motor.set(0);
+		unlock();
+	}
+	public void reset(){for(Encoder encoder : encoders) encoder.reset();}
 	public void lock(int dir){
 		while(dir < 0) dir += 360;
 		while(dir >= 360) dir -= 360;
