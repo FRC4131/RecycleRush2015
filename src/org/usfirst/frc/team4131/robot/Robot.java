@@ -3,14 +3,7 @@ package org.usfirst.frc.team4131.robot;
 
 import org.usfirst.frc.team4131.robot.commands.AutonomousCommand;
 import org.usfirst.frc.team4131.robot.oi.OI;
-import org.usfirst.frc.team4131.robot.subsystems.ArmWheels;
-import org.usfirst.frc.team4131.robot.subsystems.Arms;
-import org.usfirst.frc.team4131.robot.subsystems.Clamps;
-import org.usfirst.frc.team4131.robot.subsystems.Claw;
-import org.usfirst.frc.team4131.robot.subsystems.ClawElevator;
-import org.usfirst.frc.team4131.robot.subsystems.DriveBase;
-import org.usfirst.frc.team4131.robot.subsystems.Elevator;
-import org.usfirst.frc.team4131.robot.subsystems.Sensors;
+import org.usfirst.frc.team4131.robot.subsystems.*;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
@@ -25,15 +18,16 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
  * directory.
  */
 public class Robot extends IterativeRobot{
+	public static final int PDP_ID = 1, PCM_ID = 2;
 	public static OI oi = new OI();
-	public static final DriveBase drive = new DriveBase(new int[]{1, 2, 3, 4}, new int[][]{{0, 1}, {2, 3}, {8, 9}, {6, 7}});
+	public static final DriveBase drive = new DriveBase(new int[]{3, 4, 5, 6}, new int[][]{{0, 1}, {2, 3}, {8, 9}, {6, 7}});
 	public static final Sensors sensors = new Sensors(1);
-	public static final Arms arms = new Arms(3, 5);
-	public static final ArmWheels armWheels = new ArmWheels(4, 6);
-	public static final Elevator elevator = new Elevator(7);
-	public static final Clamps clamps = new Clamps(6, 4, 3);
-	public static final Claw claw = new Claw(6, 2, 5);
-	public static final ClawElevator clawElevator = new ClawElevator(3, 0);
+	public static final Arms arms = new Arms(9, 10);
+	public static final ArmWheels armWheels = new ArmWheels(11, 12);
+	public static final Elevator elevator = new Elevator(7, 8, 10, 11, 12, 13);
+	public static final Clamps clamps = new Clamps(4, 3);
+	public static final Claw claw = new Claw(2, 5);
+	public static final ClawElevator clawElevator = new ClawElevator(13, 0);
 	
 	private Command autonomous = new AutonomousCommand();
 	@Override public void robotInit(){}

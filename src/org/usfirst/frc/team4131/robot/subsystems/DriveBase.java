@@ -1,4 +1,3 @@
-
 package org.usfirst.frc.team4131.robot.subsystems;
 
 import org.usfirst.frc.team4131.robot.Robot;

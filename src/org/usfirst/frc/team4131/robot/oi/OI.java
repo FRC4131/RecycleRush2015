@@ -1,12 +1,9 @@
 package org.usfirst.frc.team4131.robot.oi;
 
-import org.usfirst.frc.team4131.robot.commands.ClampCommand;
-import org.usfirst.frc.team4131.robot.commands.ClawCommand;
-import org.usfirst.frc.team4131.robot.commands.DriverOrientationCommand;
-import org.usfirst.frc.team4131.robot.commands.LockCommand;
-import org.usfirst.frc.team4131.robot.commands.SensorResetCommand;
+import static org.usfirst.frc.team4131.robot.oi.GameController.*;
 
-import edu.wpi.first.wpilibj.Joystick;
+import org.usfirst.frc.team4131.robot.commands.*;
+
 import edu.wpi.first.wpilibj.buttons.Button;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
@@ -15,9 +12,7 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
  * interface to the commands and command groups that allow control of the robot.
  */
 public class OI{
-	private static final int A=1, B=2, X=3, Y=4, LEFT_BUMPER=5, RIGHT_BUMPER=6, SCREEN_SELECT=7, MENU=8, LEFT_STICK=9, RIGHT_STICK=10;
-	private static final int LEFT_X=0, LEFT_Y=1, LEFT_TRIGGER=2, RIGHT_TRIGGER=3, RIGHT_X=4, RIGHT_Y=5;
-	private Joystick drive = new Joystick(0), aux = new Joystick(1);
+	private GameController drive = new GameController(0), aux = new GameController(1);
 	private Button clawOpen = new JoystickButton(aux, Y), clawClose = new JoystickButton(aux, A),
 			engageClamp = new JoystickButton(aux, X), disengageClamp = new JoystickButton(aux, B), lock = new POV(drive),
 			unlock = new JoystickButton(drive, LEFT_BUMPER), driverOriented = new JoystickButton(drive, SCREEN_SELECT),
@@ -35,15 +30,17 @@ public class OI{
 		driverOriented.whenPressed(new DriverOrientationCommand());
 		resetSensors.whenPressed(new SensorResetCommand());
 	}
-	public double x(){return drive.getRawAxis(LEFT_X)* 1.25;}
-	public double y(){return -drive.getRawAxis(LEFT_Y);}
-	public double rotation(){return drive.getRawAxis(RIGHT_X);}
+	public double x(){return removeDeadband(drive.getRawAxis(LEFT_X)) * 1.25;}
+	public double y(){return -removeDeadband(drive.getRawAxis(LEFT_Y));}
+	public double rotation(){return removeDeadband(drive.getRawAxis(RIGHT_X));}
 	public int lock(){return drive.getPOV();}
-	public double leftArm(){return aux.getRawAxis(LEFT_X);}
-	public double rightArm(){return aux.getRawAxis(RIGHT_X);}
-	public double leftArmWheels(){return aux.getRawAxis(LEFT_Y);}
-	public double rightArmWheels(){return aux.getRawAxis(RIGHT_Y);}
-	public double clawElevation(){return aux.getRawAxis(LEFT_Y);}
-	public double elevator(){return drive.getRawAxis(RIGHT_TRIGGER) - drive.getRawAxis(LEFT_TRIGGER);}
+	public double leftArm(){return removeDeadband(aux.getRawAxis(LEFT_X));}
+	public double rightArm(){return removeDeadband(aux.getRawAxis(RIGHT_X));}
+	public double leftArmWheels(){return removeDeadband(aux.getRawAxis(LEFT_Y));}
+	public double rightArmWheels(){return removeDeadband(aux.getRawAxis(RIGHT_Y));}
+	public double clawElevation(){return removeDeadband(aux.getRawAxis(LEFT_Y));}
+	public double elevator(){return removeDeadband(drive.getRawAxis(RIGHT_TRIGGER) - drive.getRawAxis(LEFT_TRIGGER));}
+	
+	private static double removeDeadband(double raw){return (Math.abs(raw)) > 0.09 ? raw : 0;}
 }
 
