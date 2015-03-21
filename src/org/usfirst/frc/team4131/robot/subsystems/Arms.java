@@ -14,10 +14,9 @@ public class Arms extends Subsystem{
 	}
 	protected void initDefaultCommand(){setDefaultCommand(new DefaultArmsCommand());}
 	public void set(double left, double right){
-		this.left.set(left);
-		this.right.set(right);
+		this.left.set(-left);
+		this.right.set(-right);
 	}
-	public double getL(){return left.get();}
 	public double get(){return right.get();}
 }
 

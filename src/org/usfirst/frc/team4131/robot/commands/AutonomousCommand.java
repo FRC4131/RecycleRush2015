@@ -5,9 +5,9 @@ import org.usfirst.frc.team4131.robot.subsystems.Claw;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 
 public class AutonomousCommand extends CommandGroup{
-	public  AutonomousCommand() {
-		addSequential(new ClawCommand(false));
-		
+	public  AutonomousCommand(){
+		addParallel(new ElevatorResetCommand());
+		addParallel(new ClawCommand(false));
 		addParallel(new ClawElevateCommand(Claw.HEIGHT));
 		addSequential(new TurnCommand(180, false));
 		
