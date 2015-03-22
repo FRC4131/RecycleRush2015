@@ -6,8 +6,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.Command;
 
 public class SensorResetCommand extends Command{
-	private boolean hasRun = false;
-	@Override protected void initialize(){}
+	private boolean hasRun;
+	@Override protected void initialize(){hasRun = false;}
 	@Override protected void execute(){
 		Robot.sensors.reset();
 		Robot.drive.reset();

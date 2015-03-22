@@ -4,17 +4,18 @@ import org.usfirst.frc.team4131.robot.Robot;
 
 import edu.wpi.first.wpilibj.command.Command;
 
-public class ClampCommand extends Command{
-	private boolean engaged, hasRun;
-	public ClampCommand(boolean engaged){
+public class LogCommand extends Command{
+	private Object parent;
+	private String message;
+	private boolean hasRun;
+	public LogCommand(Object parent, String message){
 		super();
-		requires(Robot.clamps);
-		this.engaged = engaged;
+		this.parent = parent;
+		this.message = message;
 	}
 	@Override protected void initialize(){hasRun = false;}
-	@Override protected void execute(){Robot.clamps.set(engaged); hasRun = true;}
+	@Override protected void execute(){Robot.log(parent, message); hasRun = true;}
 	@Override protected boolean isFinished(){return hasRun;}
 	@Override protected void end(){}
 	@Override protected void interrupted(){}
-	
 }

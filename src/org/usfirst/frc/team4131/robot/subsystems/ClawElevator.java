@@ -18,11 +18,14 @@ public class ClawElevator extends Subsystem{
 		potMult = this.pot.getLSBWeight() * Math.exp(-9);
 	}
 	@Override protected void initDefaultCommand(){setDefaultCommand(new DefaultClawElevatorCommand());}
-	public void set(double target){
+	public void setElevation(double target){
 		double diff = target - get();
 		if(diff > 1) elevator.set(0.7);
 		else if(diff < -1) elevator.set(-0.7);
 		else elevator.set(0);
+	}
+	public void set(double speed){
+		elevator.set(speed);
 	}
 	public double get(){return pot.getVoltage() * potMult - potOffset;}
 	

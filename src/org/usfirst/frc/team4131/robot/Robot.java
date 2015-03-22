@@ -1,5 +1,7 @@
 package org.usfirst.frc.team4131.robot;
 
+import java.util.Calendar;
+
 import org.usfirst.frc.team4131.robot.commands.AutonomousCommand;
 import org.usfirst.frc.team4131.robot.oi.Controller;
 import org.usfirst.frc.team4131.robot.oi.OI;
@@ -55,31 +57,51 @@ public class Robot extends IterativeRobot{
 	@Override public void autonomousPeriodic(){Scheduler.getInstance().run();}
 	
 	@Override public void teleopInit(){autonomous.cancel();}
-	@Override
-	public void teleopPeriodic(){Scheduler.getInstance().run(); dashboard();}
+	@Override public void teleopPeriodic(){Scheduler.getInstance().run(); dashboard();}
 	private void dashboard(){
-		Scheduler.getInstance().run();
 		SmartDashboard.putNumber("EL-E", elevator.getEncL());
 		SmartDashboard.putNumber("ER-E", elevator.getEncR());
+		SmartDashboard.putNumber("EL-ER", elevator.getEncRawL());
+		SmartDashboard.putNumber("ER-ER", elevator.getEncRawR());
 		SmartDashboard.putNumber("EL-C", elevator.getCurrentL());
 		SmartDashboard.putNumber("ER-C", elevator.getCurrentR());
-		SmartDashboard.putNumber("DLF-E", drive.getEncoderDistance(0));
-		SmartDashboard.putNumber("DLB-E", drive.getEncoderDistance(1));
-		SmartDashboard.putNumber("DRF-E", drive.getEncoderDistance(2));
-		SmartDashboard.putNumber("DRB-E", drive.getEncoderDistance(3));
+		SmartDashboard.putNumber("EL-V", elevator.getL());
+		SmartDashboard.putNumber("ER-V", elevator.getR());
+		SmartDashboard.putNumber("OI-EL", oi.elevatorL());
+		SmartDashboard.putNumber("OI-ER", oi.elevatorR());
+		SmartDashboard.putNumber("Gyro", sensors.gyroAngle());
+		SmartDashboard.putBoolean("OI-DO", drive.isDriverOriented());
+		for(int i=0;i<4;i++){
+			SmartDashboard.putNumber("D" + i + "-EV", drive.getEncoderDistance(i));
+			SmartDashboard.putNumber("D" + i + "-ER", drive.getEncoderRate(i));
+			SmartDashboard.putNumber("D" + i + "-C", drive.getCurrent(i));
+		}
+		if(oi.getButton(true, Controller.B)){
+			sensors.reset();
+			drive.reset();
+			elevator.resetL();
+			elevator.resetR();
+			System.out.println("Reset");
+		}
 	}
-	
-	@Override public void testInit(){}
+	@Override
+	public void testInit(){
+		System.out.println("Test");
+	}
 	@Override
 	public void testPeriodic(){
-		Scheduler.getInstance().run();
-		drive.getMotor(0).set(oi.getButton(true, Controller.Y) ? -0.2 : 0);
-		drive.getMotor(1).set(oi.getButton(true, Controller.X) ? -0.2 : 0);
-		drive.getMotor(2).set(oi.getButton(true, Controller.B) ? -0.2 : 0);
-		drive.getMotor(3).set(oi.getButton(true, Controller.A) ? -0.2 : 0);
 		dashboard();
 	}
 	
 	@Override public void disabledInit(){}
 	@Override public void disabledPeriodic(){Scheduler.getInstance().run(); dashboard();}
+	
+	public static void log(Object logger, String message){
+		Calendar now = Calendar.getInstance();
+		int hour = now.get(Calendar.HOUR_OF_DAY);
+		int minute = now.get(Calendar.MINUTE);
+		int second = now.get(Calendar.SECOND);
+		int milli = now.get(Calendar.MILLISECOND);
+		System.out.println(String.format("LOG (%02d:%02d:%02d.%03d) -> %s: %s", hour, minute, second, milli, logger.getClass().getSimpleName(), message));
+	}
 }

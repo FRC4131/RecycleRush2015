@@ -14,5 +14,8 @@ public class Claw extends Subsystem{
 		this.claw = new DoubleSolenoid(Robot.PCM_ID, open, close);
 	}
 	protected void initDefaultCommand(){}//Handled by OI
-	public void setOpen(boolean open){claw.set(open ? Value.kForward : Value.kReverse);}
+	public void setOpen(boolean open){
+		claw.set(open ? Value.kForward : Value.kReverse);
+		Robot.log(this, "Setting claw " + (open ? "open" : "closed"));
+	}
 }

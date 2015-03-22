@@ -4,36 +4,22 @@ import org.usfirst.frc.team4131.robot.Robot;
 
 import edu.wpi.first.wpilibj.command.Command;
 
-/**
- *
- */
 public class ClawCommand extends Command{
-	private boolean target;
+	private boolean open, hasRun;
 	public ClawCommand(boolean open){
 		super();
 		requires(Robot.claw);
-		this.target = open;
+		this.open = open;
 	}
-	protected void initialize(){}
+	protected void initialize(){
+		hasRun = false;
+		Robot.log(this, "Starting (" + open + ")");
+	}
 	protected void execute(){
-		Robot.claw.setOpen(target);
+		Robot.claw.setOpen(open);
+		hasRun = true;
 	}
-
-	@Override
-	protected boolean isFinished(){
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected void end(){
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void interrupted(){
-		// TODO Auto-generated method stub
-		
-	}
+	@Override protected boolean isFinished(){return hasRun;}
+	@Override protected void end(){Robot.log(this, "Ending");}
+	@Override protected void interrupted(){Robot.log(this, "Interrupting");}
 }
