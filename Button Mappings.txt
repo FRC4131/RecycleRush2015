@@ -1,0 +1,17 @@
+Drive Controller
+	L Stick:	drive (forward/backward, strafe)
+	R Stick X:	turning
+	R Stick Y:	
+	L Trigger:	reverse throttle (further it's pushed, slower you go)
+	R Trigger:	push out box (conveyor)
+	L Bumper:	reverse R Trigger (pull in)
+	R Bumper:	
+	A:			
+	B:			
+	X:			
+	Y:			
+	+Pad:		
+	Back:		
+	Set Screen:		
+	L Press:	
+	R Press:	
