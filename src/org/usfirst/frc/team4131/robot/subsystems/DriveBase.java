@@ -68,6 +68,5 @@ public class DriveBase extends Subsystem{
 		while(value >= max) value -= range;
 		return value;
 	}
-	private static double constrain(double value, double min, double max){return Math.max(Math.min(value, max), min);}
 }
 

@@ -2,13 +2,10 @@ package org.usfirst.frc.team4131.robot.commands;
 
 import org.usfirst.frc.team4131.robot.Robot;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 
 public class ElevatorResetCommand extends Command{
-	private boolean left, right;//Whether each side has been zeroed
-	private Timer timerL = new Timer(), timerR = new Timer();//Started when the thing is zeroed out 
-	private final double delay = 0.1;//Time, in seconds, to wait for the elevator to bounce back
+	private boolean leftReset, rightReset;//Whether each side has been zeroed
 	public ElevatorResetCommand(){
 		super();
 		requires(Robot.elevator);
@@ -16,41 +13,39 @@ public class ElevatorResetCommand extends Command{
 	@Override
 	protected void initialize(){
 		Robot.log(this, "Starting");
-		left = false;
-		right = false;
+		leftReset = false;
+		rightReset = false;
 	}
 	@Override
 	protected void execute(){
-		if(!left){
+		if(!leftReset){
 			Robot.elevator.moveLeftDown();
-			if(Robot.elevator.getCurrentL() > 1.5){
-				left = true;
+//			if(Robot.elevator.getCurrentL() > 1.5){
+			if(Robot.elevator.getLimitL()){
+				leftReset = true;
 				Robot.elevator.stopL();
 				System.out.println("Left centered");
-				timerL.reset();
-				timerL.start();
 			}
 		}
-		if(!right){
+		if(!rightReset){
 			Robot.elevator.moveRightDown();
-			if(Robot.elevator.getCurrentR() > 1.5){
-				right = true;
+//			if(Robot.elevator.getCurrentR() > 1.5){
+			if(Robot.elevator.getLimitR()){
+				rightReset = true;
 				Robot.elevator.stopR();
 				System.out.println("Right centered");
-				timerR.reset();
-				timerR.start();
 			}
 		}
 	}
 	@Override
 	protected boolean isFinished(){
-		return left && right && timerL.get() >= delay && timerR.get() >= delay;//Both sides are done and the methods
+		return leftReset && rightReset;//Both sides are centered
 	}
 	@Override
 	protected void end(){
 		Robot.log(this, "Ending");
-		Robot.elevator.resetL();
-		Robot.elevator.resetR();
+//		Robot.elevator.resetL();
+//		Robot.elevator.resetR();
 	}
 	@Override
 	protected void interrupted(){

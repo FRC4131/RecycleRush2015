@@ -35,11 +35,11 @@ public class Robot extends IterativeRobot{
 	@Override
 	public void robotInit(){
 		try{
-			drive = new DriveBase(new int[]{3, 4, 5, 6}, new int[]{0, 1, 2, 3, 8, 9, 6, 7});
+			drive = new DriveBase(new int[]{3, 4, 5, 6}, new int[]{4, 5, 8, 9, 10, 11, 12, 13});
 			sensors = new Sensors(1);
 			arms = new Arms(9, 10);
 			armWheels = new ArmWheels(11, 12);
-			elevator = new Elevator(7, 8, 4, 5, 10, 11);
+			elevator = new Elevator(7, 8, 6, 7);
 			clamps = new Clamps(3, 4);
 			claw = new Claw(2, 5);
 			clawElevator = new ClawElevator(13, 0);
@@ -59,10 +59,6 @@ public class Robot extends IterativeRobot{
 	@Override public void teleopInit(){autonomous.cancel();}
 	@Override public void teleopPeriodic(){Scheduler.getInstance().run(); dashboard();}
 	private void dashboard(){
-		SmartDashboard.putNumber("EL-E", elevator.getEncL());
-		SmartDashboard.putNumber("ER-E", elevator.getEncR());
-		SmartDashboard.putNumber("EL-ER", elevator.getEncRawL());
-		SmartDashboard.putNumber("ER-ER", elevator.getEncRawR());
 		SmartDashboard.putNumber("EL-C", elevator.getCurrentL());
 		SmartDashboard.putNumber("ER-C", elevator.getCurrentR());
 		SmartDashboard.putNumber("EL-V", elevator.getL());
@@ -72,17 +68,14 @@ public class Robot extends IterativeRobot{
 		SmartDashboard.putNumber("Gyro", sensors.gyroAngle());
 		SmartDashboard.putBoolean("OI-DO", drive.isDriverOriented());
 		for(int i=0;i<4;i++){
-			SmartDashboard.putNumber("D" + i + "-EV", drive.getEncoderDistance(i));
-			SmartDashboard.putNumber("D" + i + "-ER", drive.getEncoderRate(i));
 			SmartDashboard.putNumber("D" + i + "-C", drive.getCurrent(i));
 		}
 		if(oi.getButton(true, Controller.B)){
 			sensors.reset();
-			drive.reset();
-			elevator.resetL();
-			elevator.resetR();
 			System.out.println("Reset");
 		}
+		SmartDashboard.putBoolean("EL-LS", elevator.getLimitL());
+		SmartDashboard.putBoolean("ER-LS", elevator.getLimitR());
 	}
 	@Override
 	public void testInit(){

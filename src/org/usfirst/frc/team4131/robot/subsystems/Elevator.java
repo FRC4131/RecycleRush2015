@@ -4,24 +4,22 @@ import org.usfirst.frc.team4131.robot.Robot;
 import org.usfirst.frc.team4131.robot.commands.defcommands.DefaultElevatorCommand;
 
 import edu.wpi.first.wpilibj.CANTalon;
-import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class Elevator extends Subsystem{
 	private CANTalon chainsL, chainsR;
-	private double offsetL = 0, offsetR = 0;
-	private Encoder encL, encR;
-	public Elevator(int chainsL, int chainsR, int encL1, int encL2, int encR1, int encR2){
+//	private double offsetL = 0, offsetR = 0;
+	private DigitalInput limitL, limitR;
+	public Elevator(int chainsL, int chainsR, int limitL, int limitR){
 		super();
 		this.chainsL = new CANTalon(chainsL);
 		this.chainsR = new CANTalon(chainsR);
-		this.encL = new Encoder(encL1, encL2);
-		this.encL.setDistancePerPulse(1);
-		this.encR = new Encoder(encR1, encR2);
-		this.encR.setDistancePerPulse(1);
+		this.limitL = new DigitalInput(limitL);
+		this.limitR = new DigitalInput(limitR);
 	}
 	protected void initDefaultCommand(){setDefaultCommand(new DefaultElevatorCommand());}
-	public void set(double speed, boolean sync){
+	/*public void set(double speed, boolean sync){
 		if(sync && Math.abs(getEncL() - getEncR()) < 2000){
 			double cl = getEncL(), cr = getEncR();//Current encoder values
 			double t = (speed > 0 ? Math.min(cl, cr) : Math.max(cl, cr));//Target is the value closest to where it needs to be: highest if heading up, lowest if heading down.
@@ -31,32 +29,11 @@ public class Elevator extends Subsystem{
 			chainsL.set(-speed);
 			chainsR.set(speed);
 		}
-	}
-	/*
-	public void set(double speed){chainsL.set(-speed); chainsR.set(speed);}
-	*/
-	/*public void set(double speed){
-		double cl = getEncL(), cr = getEncR();//Current encoder values
-		double t = (cl + cr)/2;//Target encoder value; halfway in the middle
-		double vl = speed + 0.1*(t - cl), vr = speed + 0.1*(t-cr);//Set to given value, with small adjustment to make the chains level out
-		chainsL.set(vl); chainsR.set(vr);
 	}*/
-	/*
 	public void set(double speed){
-		double cl = getEncL(), cr = getEncR();//Current encoder values
-		double t = (speed > 0 ? Math.max(cl, cr) : Math.min(cl, cr));//Target is the value closest to where it needs to be: highest if heading up, lowest if heading down.
-		double vl = speed + 0.1*(t - cl), vr = speed + 0.1*(t-cr);//Input value with small adjustment for leveling
-		chainsL.set(vl); chainsR.set(vr);
+		chainsL.set(-speed);
+		chainsR.set(speed);
 	}
-	*/
-	/*
-	public void set(double speed){
-		double cl = getEncL(), cr = getEncR();//Current encoder values
-		double t = (speed > 0 ? Math.min(cl, cr) : Math.max(cl, cr));//Target is the value closest to where it needs to be: highest if heading up, lowest if heading down.
-		double vl = speed + 0.1*(t - cl), vr = speed + 0.1*(t-cr);//Input value with small adjustment for leveling
-		chainsL.set(vl); chainsR.set(vr);
-	}
-	 */
 	public void setL(double speed){
 		chainsL.set(-speed);
 		if(speed!=0) Robot.log(this, "Set left to " + (-speed));
@@ -71,20 +48,18 @@ public class Elevator extends Subsystem{
 	public double get(){return (chainsL.get() + chainsR.get()) / 2;}
 	public double getL(){return -chainsL.get();}
 	public double getR(){return chainsR.get();}
-	public double getEncL(){return encL.getDistance() - offsetL;}
-	public double getEncR(){return encR.getDistance() - offsetR;}
-	public double getEncRawL(){return encL.getDistance();}
-	public double getEncRawR(){return encR.getDistance();}
 	public double getCurrentL(){return chainsL.getOutputCurrent();}
 	public double getCurrentR(){return chainsR.getOutputCurrent();}
-	public void resetL(){
+	/*public void resetL(){
 		offsetL = encL.getDistance();
 		System.out.println("Resetting left elevator to " + offsetL);
 	}
 	public void resetR(){
 		offsetR = encR.getDistance();
 		System.out.println("Resetting right elevator to " + offsetR);
-	}
+	}*/
+	public boolean getLimitL(){return limitL.get();}
+	public boolean getLimitR(){return limitR.get();}
 	
 	//Defensive Cheaty Hack Methods
 	public void moveLeftDown(){

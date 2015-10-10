@@ -11,8 +11,6 @@ public class SensorResetCommand extends Command{
 	@Override protected void execute(){
 		Robot.sensors.reset();
 		Robot.drive.reset();
-		Robot.elevator.resetL();
-		Robot.elevator.resetR();
 		hasRun = true;
 		DriverStation.reportError("Reset\n", false);
 	}

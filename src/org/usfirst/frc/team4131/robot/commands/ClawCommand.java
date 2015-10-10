@@ -12,6 +12,7 @@ public class ClawCommand extends Command{
 		this.open = open;
 	}
 	protected void initialize(){
+		
 		hasRun = false;
 		Robot.log(this, "Starting (" + open + ")");
 	}
