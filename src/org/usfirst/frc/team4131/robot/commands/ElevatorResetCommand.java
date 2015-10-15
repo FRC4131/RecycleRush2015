@@ -5,7 +5,7 @@ import org.usfirst.frc.team4131.robot.Robot;
 import edu.wpi.first.wpilibj.command.Command;
 
 public class ElevatorResetCommand extends Command{
-	private boolean leftReset, rightReset;//Whether each side has been zeroed
+	private boolean leftReset, rightReset;
 	public ElevatorResetCommand(){
 		super();
 		requires(Robot.elevator);
@@ -13,39 +13,37 @@ public class ElevatorResetCommand extends Command{
 	@Override
 	protected void initialize(){
 		Robot.log(this, "Starting");
-		leftReset = false;
-		rightReset = false;
+		leftReset = rightReset = false;
 	}
 	@Override
 	protected void execute(){
 		if(!leftReset){
-			Robot.elevator.moveLeftDown();
-//			if(Robot.elevator.getCurrentL() > 1.5){
 			if(Robot.elevator.getLimitL()){
-				leftReset = true;
 				Robot.elevator.stopL();
-				System.out.println("Left centered");
+				leftReset = true;
+				Robot.elevator.resetL();
+			}else{
+				Robot.elevator.setL(-0.5);
 			}
 		}
 		if(!rightReset){
-			Robot.elevator.moveRightDown();
-//			if(Robot.elevator.getCurrentR() > 1.5){
 			if(Robot.elevator.getLimitR()){
-				rightReset = true;
 				Robot.elevator.stopR();
-				System.out.println("Right centered");
+				rightReset = true;
+				Robot.elevator.resetR();
+			}else{
+				Robot.elevator.setR(-0.5);
 			}
 		}
 	}
 	@Override
 	protected boolean isFinished(){
-		return leftReset && rightReset;//Both sides are centered
+		return Robot.elevator.getLimitL() && Robot.elevator.getLimitR();//Both sides are centered
 	}
 	@Override
 	protected void end(){
 		Robot.log(this, "Ending");
-//		Robot.elevator.resetL();
-//		Robot.elevator.resetR();
+		Robot.elevator.resetL();
 	}
 	@Override
 	protected void interrupted(){

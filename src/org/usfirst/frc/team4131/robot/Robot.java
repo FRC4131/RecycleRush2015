@@ -3,13 +3,17 @@ package org.usfirst.frc.team4131.robot;
 import java.util.Calendar;
 
 import org.usfirst.frc.team4131.robot.commands.AutonomousCommand;
-import org.usfirst.frc.team4131.robot.oi.Controller;
 import org.usfirst.frc.team4131.robot.oi.OI;
-import org.usfirst.frc.team4131.robot.subsystems.*;
+import org.usfirst.frc.team4131.robot.subsystems.Clamps;
+import org.usfirst.frc.team4131.robot.subsystems.Claw;
+import org.usfirst.frc.team4131.robot.subsystems.ClawElevator;
+import org.usfirst.frc.team4131.robot.subsystems.DriveBase;
+import org.usfirst.frc.team4131.robot.subsystems.Elevator;
+import org.usfirst.frc.team4131.robot.subsystems.Intake;
+import org.usfirst.frc.team4131.robot.subsystems.Sensors;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -25,24 +29,22 @@ public class Robot extends IterativeRobot{
 	public static OI oi;
 	public static DriveBase drive;
 	public static Sensors sensors;
-	public static Arms arms;
-	public static ArmWheels armWheels;
+	public static Intake intake;
 	public static Elevator elevator;
 	public static Clamps clamps;
 	public static Claw claw;
 	public static ClawElevator clawElevator;
-	private Command autonomous;
+	private AutonomousCommand autonomous;
 	@Override
 	public void robotInit(){
 		try{
-			drive = new DriveBase(new int[]{3, 4, 5, 6}, new int[]{4, 5, 8, 9, 10, 11, 12, 13});
+			drive = new DriveBase(new int[]{3, 4, 5, 6});
 			sensors = new Sensors(1);
-			arms = new Arms(9, 10);
-			armWheels = new ArmWheels(11, 12);
-			elevator = new Elevator(7, 8, 6, 7);
-			clamps = new Clamps(3, 4);
-			claw = new Claw(2, 5);
-			clawElevator = new ClawElevator(13, 0);
+			intake = new Intake(11, 12);
+			elevator = new Elevator(7, 8, 0, 1, 2, 3, 4, 5);
+			clamps = new Clamps(0, 1);
+			claw = new Claw(2, 3);
+			clawElevator = new ClawElevator(13/*, 0*/);
 			oi = new OI(0, 1);
 			autonomous = new AutonomousCommand();
 		}catch(Throwable ex){
@@ -53,41 +55,52 @@ public class Robot extends IterativeRobot{
 		}
 	}
 	
-	@Override public void autonomousInit(){autonomous.start();}
+	@Override public void autonomousInit(){autonomous.start(); log(this, "Autonomous");}
 	@Override public void autonomousPeriodic(){Scheduler.getInstance().run();}
 	
-	@Override public void teleopInit(){autonomous.cancel();}
+	@Override public void teleopInit(){autonomous.cancel(); log(this, "TeleOp");}
 	@Override public void teleopPeriodic(){Scheduler.getInstance().run(); dashboard();}
 	private void dashboard(){
-		SmartDashboard.putNumber("EL-C", elevator.getCurrentL());
-		SmartDashboard.putNumber("ER-C", elevator.getCurrentR());
-		SmartDashboard.putNumber("EL-V", elevator.getL());
-		SmartDashboard.putNumber("ER-V", elevator.getR());
-		SmartDashboard.putNumber("OI-EL", oi.elevatorL());
-		SmartDashboard.putNumber("OI-ER", oi.elevatorR());
 		SmartDashboard.putNumber("Gyro", sensors.gyroAngle());
-		SmartDashboard.putBoolean("OI-DO", drive.isDriverOriented());
-		for(int i=0;i<4;i++){
+		//Drive
+		SmartDashboard.putNumber("OI-DX", oi.x());
+		SmartDashboard.putNumber("OI-DY", oi.y());
+		SmartDashboard.putNumber("OI-DR", oi.rotation());
+		for(int i=0; i<4; i++){
+			SmartDashboard.putNumber("D" + i + "-S", drive.getMotor(i).get());
 			SmartDashboard.putNumber("D" + i + "-C", drive.getCurrent(i));
 		}
-		if(oi.getButton(true, Controller.B)){
-			sensors.reset();
-			System.out.println("Reset");
-		}
+		//Intake
+		SmartDashboard.putNumber("OI-IS", oi.intake());
+		SmartDashboard.putNumber("I-S", intake.get());
+		SmartDashboard.putNumber("I-CL", intake.getCurrentL());
+		SmartDashboard.putNumber("I-CR", intake.getCurrentR());
+		//Elevator
+		SmartDashboard.putNumber("OI-E", oi.elevator());
+		SmartDashboard.putNumber("EL-E", elevator.getEncoderL());
+		SmartDashboard.putNumber("ER-E", elevator.getEncoderR());
+		SmartDashboard.putNumber("EL-C", elevator.getCurrentL());
+		SmartDashboard.putNumber("ER-C", elevator.getCurrentR());
+		SmartDashboard.putNumber("EL-S", elevator.getL());
+		SmartDashboard.putNumber("ER-S", elevator.getR());
 		SmartDashboard.putBoolean("EL-LS", elevator.getLimitL());
 		SmartDashboard.putBoolean("ER-LS", elevator.getLimitR());
+		//Clamps
+		SmartDashboard.putBoolean("C-E", clamps.get());
+		//Claw
+		SmartDashboard.putBoolean("C-O", claw.getOpen());
+		SmartDashboard.putNumber("OI-CE", oi.clawElevation());
+		SmartDashboard.putNumber("CE-V", clawElevator.get());
+//		SmartDashboard.putBoolean("CE-LS", clawElevator.getLimit());
 	}
 	@Override
 	public void testInit(){
-		System.out.println("Test");
+		log(this, "Test");
 	}
-	@Override
-	public void testPeriodic(){
-		dashboard();
-	}
+	@Override public void testPeriodic(){dashboard();}
 	
-	@Override public void disabledInit(){}
-	@Override public void disabledPeriodic(){Scheduler.getInstance().run(); dashboard();}
+	@Override public void disabledInit(){log(this, "Disabled");}
+	@Override public void disabledPeriodic(){dashboard();}
 	
 	public static void log(Object logger, String message){
 		Calendar now = Calendar.getInstance();

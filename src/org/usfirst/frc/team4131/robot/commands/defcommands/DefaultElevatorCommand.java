@@ -6,8 +6,7 @@ public class DefaultElevatorCommand extends DefaultCommand{
 	public DefaultElevatorCommand(){super(Robot.elevator);}
 	@Override
 	protected void execute(){
-		Robot.elevator.setL(Robot.oi.elevatorL());
-		Robot.elevator.setR(Robot.oi.elevatorR());
+		Robot.elevator.set(Robot.oi.elevator());
 	}
 	@Override protected void end(){Robot.elevator.stop();}
 }

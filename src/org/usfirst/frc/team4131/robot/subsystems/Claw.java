@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class Claw extends Subsystem{
+	public static final boolean OPEN = true, CLOSE = false;
 	public static final double HEIGHT = 66;//Height, in inches, of the claw
 	private final DoubleSolenoid claw;
 	public Claw(int open, int close){
@@ -18,4 +19,5 @@ public class Claw extends Subsystem{
 		claw.set(open ? Value.kForward : Value.kReverse);
 		Robot.log(this, "Setting claw " + (open ? "open" : "closed"));
 	}
+	public boolean getOpen(){return claw.get().equals(Value.kForward);}
 }

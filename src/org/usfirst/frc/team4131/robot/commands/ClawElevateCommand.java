@@ -6,24 +6,24 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 
 public class ClawElevateCommand extends Command{
-	private double target, time;
+	private double speed, time;
 	private Timer timer = new Timer();
-	public ClawElevateCommand(double target, double time){
+	public ClawElevateCommand(double speed, double time){
 		super();
 		requires(Robot.clawElevator);
-		this.target = target; this.time = time;
+		this.speed = speed; this.time = time;
 	}
 	@Override
 	protected void initialize(){
 		timer.start();
 		timer.reset();
-		Robot.log(this, "Starting (" + target + ", " + time + ")");
+		Robot.log(this, "Starting (" + speed + ", " + time + ")");
 	}
 	@Override
 	protected void execute(){
-		Robot.clawElevator.set(target);
+		Robot.clawElevator.set(speed);
 	}
-	@Override protected boolean isFinished(){return timer.get() >= time;}//1" tolerance on either side
+	@Override protected boolean isFinished(){return timer.get() >= time;}
 	@Override
 	protected void end(){
 		Robot.clawElevator.set(0);

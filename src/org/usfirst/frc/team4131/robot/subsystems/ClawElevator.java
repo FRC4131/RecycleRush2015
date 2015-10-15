@@ -2,20 +2,16 @@ package org.usfirst.frc.team4131.robot.subsystems;
 
 import org.usfirst.frc.team4131.robot.commands.defcommands.DefaultClawElevatorCommand;
 
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class ClawElevator extends Subsystem{
 	private final SpeedController elevator;
-	private final AnalogInput pot;
-	private final double potOffset, potMult;
-	public ClawElevator(int elevator, int pot){
+//	private final DigitalInput limit;
+	public ClawElevator(int elevator/*, int limit*/){
 		this.elevator = new CANTalon(elevator);
-		this.pot = new AnalogInput(pot);
-		potOffset = this.pot.getOffset() * Math.exp(-9);
-		potMult = this.pot.getLSBWeight() * Math.exp(-9);
+//		this.limit = new DigitalInput(limit);
 	}
 	@Override protected void initDefaultCommand(){setDefaultCommand(new DefaultClawElevatorCommand());}
 	public void setElevation(double target){
@@ -25,8 +21,9 @@ public class ClawElevator extends Subsystem{
 		else elevator.set(0);
 	}
 	public void set(double speed){
-		elevator.set(speed);
+		/*if(limit.get()) stop(); else*/ elevator.set(speed);
 	}
-	public double get(){return pot.getVoltage() * potMult - potOffset;}
-	
+	public void stop(){elevator.set(0);}
+	public double get(){return elevator.get();}
+//	public boolean getLimit(){return limit.get();}
 }

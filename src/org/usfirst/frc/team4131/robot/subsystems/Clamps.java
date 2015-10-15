@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class Clamps extends Subsystem{
+	public static final boolean ENGAGED = true, DISENGAGED = false;
 	private DoubleSolenoid clamps;
 	public Clamps(int engage, int disengage){
 		clamps = new DoubleSolenoid(Robot.PCM_ID, engage, disengage);
